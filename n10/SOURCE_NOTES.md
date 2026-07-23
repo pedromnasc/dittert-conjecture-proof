@@ -53,5 +53,5 @@ manifest were created during repository packaging.
 
 These materials are an exact computer-assisted working proof, not a claim of
 completed journal peer review. The current repository coverage is dimensions
-`4,5,9,10,11,12,13,14,15,16`; dimensions `6,7,8` remain open within this
+`4,5,8,9,10,11,12,13,14,15,16`; dimensions `6,7` remain open within this
 project.

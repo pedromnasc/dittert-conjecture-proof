@@ -1,0 +1,717 @@
+\documentclass[11pt]{article}
+\usepackage[a4paper,margin=27mm]{geometry}
+\usepackage{amsmath,amssymb,amsthm,mathtools}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\hypersetup{colorlinks=true,linkcolor=blue!55!black,citecolor=blue!55!black,urlcolor=blue!55!black}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{5pt plus 1pt}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\theoremstyle{remark}
+\newtheorem{remark}[theorem]{Remark}
+\newcommand{\per}{\operatorname{per}}
+\newcommand{\one}{\mathbf 1}
+\newcommand{\RR}{\mathbb R}
+\newcommand{\QQ}{\mathbb Q}
+
+\title{Dittert's conjecture in dimension 8\\
+\large An exact computer-assisted boundary-exclusion proof}
+\author{Pedro Paulo Marques do Nascimento}
+\date{23 July 2026}
+
+\begin{document}
+\maketitle
+
+\begin{center}
+\fbox{\parbox{0.90\textwidth}{\textbf{Status.} This is an exact, reproducible
+working proof. It has not yet undergone independent peer review. The finite
+dimension-specific calculations are checked by two separately implemented
+standard-library verifiers.}}
+
+\small Licensed under \href{https://creativecommons.org/licenses/by/4.0/}{CC BY 4.0}.
+\end{center}
+
+\begin{abstract}
+For a nonnegative $n\times n$ matrix $A$ whose entries sum to $n$, let $r_i,c_j$
+be its row and column sums and put
+\[
+ \Phi(A)=\prod_i r_i+\prod_j c_j-\per A.
+\]
+We prove Dittert's conjecture in dimension $n=8$.  A maximal Li scaling
+reduces the boundary problem to whole, marginal, and proper tight cuts.
+Most proper cuts are excluded by exact staircase-face bounds; the six
+one-dimensional-core cuts use sharper dimension-specific line-sum deficit
+estimates.  For a marginal cut, stationarity forces a large column containing
+the minimum row.  Cofactor nonnegativity bounds every other row meeting this
+column, while the zeroes in that column supply an additional staircase-face
+permanent bound.  Six exact degree-65 Bernstein certificates exclude every
+possible nontrivial column support.  No four-independent-zero theorem is used.
+\end{abstract}
+
+\section{Statement and published inputs}
+
+Let
+\[
+ K_n=\left\{A=(a_{ij})\in\RR_{\ge0}^{n\times n}:
+       \sum_{i,j}a_{ij}=n\right\},
+ \qquad
+ \gamma_n=\frac{n!}{n^n}.
+\]
+For $A\in K_n$, write
+\[
+ R=\prod_{i=1}^n r_i,\qquad
+ C=\prod_{j=1}^n c_j,\qquad
+ P=\per A.
+\]
+Thus $\Phi(A)=R+C-P$ and $\Phi(J_n/n)=2-\gamma_n$.
+
+\begin{theorem}\label{thm:main}
+For every $A\in K_8$,
+\[
+ \Phi(A)\le 2-\frac{8!}{8^8},
+\]
+with equality if and only if $A=J_8/8$.
+\end{theorem}
+
+We use the following published results.
+\begin{enumerate}
+\item Hwang proved that the only possible positive $\Phi$-maximizer in $K_n$
+is $J_n/n$ \cite{Hwang1986}.
+\item Cheon and Wanless proved that a partly decomposable matrix cannot
+maximize $\Phi$, and that a maximizer cannot have its complete zero set equal,
+up to row and column permutations, to one proper rectangular block
+\cite[Theorems 3.2 and 3.7]{CheonWanless2012}.
+\item Li's cut characterization says that a nonnegative $n\times n$ matrix
+$S$ is doubly superstochastic if and only if
+\[
+ \sum_{i\in I,j\in J}s_{ij}\ge |I|+|J|-n
+\]
+for all $I,J\subseteq[n]$ \cite{Li1990}; see also
+\cite[Lemma 2.2]{CheonWanless2012}.
+\item On a staircase face of the Birkhoff polytope, the barycenter minimizes
+the permanent \cite{Hwang1985}.
+\item Minc's averaging theorem for permanent minimizers with repeated support
+rows and columns gives the block form used below \cite[Theorem 1]{Minc1984};
+see also \cite[Section 2]{PulaSongWanless2011}.
+\item The van der Waerden permanent theorem gives $\per B\ge\gamma_n$ for
+every doubly stochastic $B$, with equality only at $J_n/n$
+\cite{Egorychev1981,Falikman1981}.
+\end{enumerate}
+The support-stationarity equation and the large-column support argument used
+below are proved directly; they are not additional external assumptions.
+
+\section{Boundary structure and the shared deficit}
+
+Because $K_n$ is compact, $\Phi$ has a global maximizer.  By Hwang's theorem,
+a nonuniform maximizer must lie on the boundary.
+
+\begin{lemma}[Two independent zeroes]\label{lem:independent-zeros}
+Every boundary $\Phi$-maximizer has two zero entries in distinct rows and
+distinct columns.
+\end{lemma}
+\begin{proof}
+Suppose a nonempty zero set contains no such pair.  Fix a zero at $(i,j)$.
+Every other zero shares row $i$ or column $j$.  If there were both a zero
+$(i,j')$, $j'\ne j$, and a zero $(i',j)$, $i'\ne i$, those two zeroes would be
+independent.  Hence all zeroes lie in one row or all lie in one column.
+
+If that row or column is entirely zero, the matrix is partly decomposable.
+Otherwise its complete zero set is one proper rectangular block.  Both cases
+are excluded for a maximizer by Cheon--Wanless.
+\end{proof}
+
+Assume for contradiction that a boundary maximizer $A$ satisfies
+$\Phi(A)\ge2-\gamma_n$.  Since the row sums and column sums each have
+arithmetic mean $1$, AM--GM gives $R,C\le1$.  Consequently $P\le\gamma_n$.
+Write
+\[
+ P=\gamma_n-\delta,\qquad 0\le\delta\le\gamma_n,
+\]
+and put $R=1-\rho$, $C=1-\sigma$.  The assumed lower bound gives
+\begin{equation}\label{eq:shared-deficit}
+ \rho+\sigma\le\delta.
+\end{equation}
+In particular,
+\begin{equation}\label{eq:product-lower}
+ R\ge1-\delta,\qquad C\ge1-\delta,
+ \qquad RC\ge1-\delta.
+\end{equation}
+
+\section{The maximal Li scaling}
+
+For $I,J\subseteq[n]$, let $s(A[I,J])$ be the sum of the indicated submatrix,
+and define
+\begin{equation}\label{eq:lambda}
+ \lambda=
+ \min_{\substack{I,J\subseteq[n]\\k:=|I|+|J|-n>0}}
+ \frac{s(A[I,J])}{k}.
+\end{equation}
+A maximizer is fully indecomposable by the Cheon--Wanless exclusion.  Hence
+every numerator in \eqref{eq:lambda} is positive, so $\lambda>0$; taking
+$I=J=[n]$ shows $\lambda\le1$.
+
+Li's theorem says that $A/\lambda$ is doubly superstochastic.  Thus there is a
+doubly stochastic matrix $B$ such that
+\begin{equation}\label{eq:domination}
+ \lambda B\le A\quad\hbox{entrywise},
+ \qquad P\ge\lambda^n\per B.
+\end{equation}
+Choose $I,J$ attaining \eqref{eq:lambda}, and set
+\[
+ u=n-|I|,\qquad v=n-|J|,\qquad k=n-u-v>0.
+\]
+There are three cases: the whole cut $(u,v)=(0,0)$, a marginal cut where
+exactly one of $u,v$ is zero, and a proper cut where $u,v\ge1$.
+
+If $u=v=0$, then $\lambda=1$.  Since $B\le A$ and both matrices have total
+sum $n$, $A=B$ is doubly stochastic.  The van der Waerden theorem and
+$P\le\gamma_n$ force $A=J_n/n$, contrary to the boundary assumption.
+
+\section{The two-independent-zero permanent gap}
+
+Let $\Omega_n^{(2)}$ be the face of the Birkhoff polytope specified by
+$b_{12}=b_{21}=0$, and put $m=n-2$.  Minc's averaging theorem permits a
+permanent minimizer on this face to be chosen in the form
+\begin{equation}\label{eq:Y}
+ Y=
+ \begin{pmatrix}
+ x_1&0&a_1\one^{\mathsf T}\\
+ 0&x_2&a_2\one^{\mathsf T}\\
+ a_1\one&a_2\one&xJ_m
+ \end{pmatrix},
+ \qquad x_i=1-ma_i,
+ \qquad a_1+a_2+mx=1.
+\end{equation}
+Here $0\le a_i\le1/m$.
+
+\begin{proposition}[One-variable reduction]\label{prop:face-reduction}
+For $m\ge4$, the minimum permanent in \eqref{eq:Y} occurs with $a_1=a_2$.
+Consequently the minimum of $\per B$ on $\Omega_n^{(2)}$ is the minimum, on
+\[
+ \frac{m-2}{m^2}\le x\le\frac1m,
+\]
+of
+\begin{equation}\label{eq:Pn}
+ P_n(x)=m!x^{m-2}
+ \left(x^2a^2+2mxab^2+m(m-1)b^4\right),
+\end{equation}
+where
+\begin{equation}\label{eq:ab}
+ a=\frac{2-m+m^2x}{2},\qquad b=\frac{1-mx}{2}.
+\end{equation}
+\end{proposition}
+\begin{proof}
+Put $s=a_1+a_2$, $p=a_1a_2$, and $x=(1-s)/m$.  Counting permanent terms in
+\eqref{eq:Y} gives, apart from the positive factor $m!x^{m-2}$,
+\[
+ E_m(s,p)=x^2(1-ms+m^2p)
+ +mx\bigl(s^2-(2+ms)p\bigr)+m(m-1)p^2.
+\]
+For fixed $s$,
+\[
+ \frac{\partial E_m}{\partial p}
+ =2m(m-1)p+(m+1)s^2-ms-1.
+\]
+Since $p\le s^2/4$ and $0\le s\le2/m$, this is at most
+\[
+ D_m(s)=\frac{(m^2+m+2)s^2-2ms-2}{2}.
+\]
+The quadratic is convex, while
+\[
+ D_m(0)=-1,
+ \qquad D_m(2/m)=-1+\frac2m+\frac4{m^2}<0
+ \quad(m\ge4).
+\]
+Thus the derivative is strictly negative.  For fixed $s$, the permanent is
+minimized by maximizing $p$, namely by $a_1=a_2=b$.  Solving the stochastic
+constraints yields \eqref{eq:ab} and the stated interval.  A second count
+gives \eqref{eq:Pn}.
+\end{proof}
+
+For $n=8$, set
+\begin{equation}\label{eq:L}
+ L_8=\frac{12249}{5000000}.
+\end{equation}
+
+\begin{proposition}[Exact two-zero bound]\label{prop:two-zero-bound}
+Every $B\in\Omega_8^{(2)}$ satisfies
+\[
+ \per B>L_8>\gamma_8.
+\]
+\end{proposition}
+\begin{proof}
+Here $m=6$ and the complete interval is $[1/9,1/6]$.  The primary verifier
+expands $P_8(x)-L_8$ over $\QQ$, verifies positive endpoint values, and uses
+an exact rational Sturm sequence to prove that it has no root on the interval.
+
+The independent verifier instead evaluates the matrix \eqref{eq:Y} with
+\eqref{eq:ab} by the literal exact Ryser formula at nine rational points,
+interpolates the degree-eight polynomial, and proves positivity by exact
+Bernstein coefficients on 256 subintervals.  Finally,
+\begin{equation}\label{eq:L-gap}
+ L_8-\gamma_8=
+ \frac{476577}{10240000000}>0.
+\end{equation}
+\end{proof}
+
+\section{Marginal tight cuts}\label{sec:marginal}
+
+We first record the stationarity equation used twice below.
+
+\begin{lemma}[Support stationarity]\label{lem:stationarity}
+At a global maximizer, for every positive entry $a_{ij}$,
+\begin{equation}\label{eq:stationarity}
+ \frac{R}{r_i}+\frac{C}{c_j}-\per A(i\mid j)=\Phi(A),
+\end{equation}
+where $A(i\mid j)$ is obtained by deleting row $i$ and column $j$.
+\end{lemma}
+\begin{proof}
+The left side is $\partial\Phi/\partial a_{ij}$.  Moving a small amount of
+mass between positive entries shows that all partial derivatives on the
+support have a common value $\mu$.  Euler's identity, using homogeneity of
+degree $n$, gives
+\[
+ n\Phi(A)=\sum_{i,j}a_{ij}\frac{\partial\Phi}{\partial a_{ij}}
+ =\mu\sum_{i,j}a_{ij}=n\mu.
+\]
+Thus $\mu=\Phi(A)$.
+\end{proof}
+
+Suppose the tight cut is marginal.  Its ratio in \eqref{eq:lambda} is an
+average of a nonempty set of row sums or column sums.  Singleton marginal cuts
+are also allowed, so a minimizing marginal cut equals a minimum line sum.  By
+transposition, choose a minimum row $i$ with
+\[
+ r_i=\lambda=1-a,\qquad 0\le a<1.
+\]
+Multiply \eqref{eq:stationarity} by $a_{ij}$ and sum over $j$.  Expansion of
+the permanent along row $i$ gives
+\[
+ R+C\sum_j\frac{a_{ij}}{c_j}-P=r_i\Phi(A).
+\]
+Therefore
+\begin{equation}\label{eq:qi}
+ q_i:=\sum_j\frac{a_{ij}}{c_j}
+ =1-(1+\theta)a,
+ \qquad \theta=\frac{R-P}{C}.
+\end{equation}
+By \eqref{eq:product-lower} and $P=\gamma_n-\delta$,
+\begin{equation}\label{eq:theta}
+ \theta\ge R-P\ge1-\gamma_n.
+\end{equation}
+Let $c_{\max}=\max_jc_j$.  Since $q_i>0$,
+\[
+ \frac{1-a}{c_{\max}}\le q_i\le1-(2-\gamma_n)a.
+\]
+Thus the last denominator is positive and
+\begin{equation}\label{eq:h}
+ c_{\max}\ge1+h(a),
+ \qquad h(a)=\frac{(1-\gamma_n)a}{1-(2-\gamma_n)a}.
+\end{equation}
+
+AM--GM on the other seven row sums and column sums gives
+\begin{align}
+ R&\le f(a):=(1-a)\left(1+\frac a7\right)^7,
+ \label{eq:f}\\
+ C&\le g(h(a)):=(1+h(a))\left(1-\frac{h(a)}7\right)^7.
+ \label{eq:g}
+\end{align}
+Define
+\begin{equation}\label{eq:D}
+ D(a)=2-f(a)-g(h(a)).
+\end{equation}
+The shared deficit implies $\delta\ge D(a)$.  The functions $f$ and $g$ are
+strictly decreasing on the relevant positive arguments, while $h$ is
+increasing, so $D$ is strictly increasing.  The exact check
+\begin{equation}\label{eq:D-endpoint}
+ D(1/20)>\gamma_8
+\end{equation}
+confines every feasible value to $0\le a<1/20$.
+
+The dominated doubly stochastic matrix $B$ inherits the two independent
+zeroes of $A$, so Proposition~\ref{prop:two-zero-bound} gives
+\begin{equation}\label{eq:marginal-permanent}
+ P\ge L_8(1-a)^8.
+\end{equation}
+The elementary scalar contradiction is
+\begin{equation}\label{eq:H}
+ H(a):=L_8(1-a)^8-\gamma_8+D(a)>0.
+\end{equation}
+After clearing the positive denominator
+$7^7[1-(2-\gamma_8)a]^8$, its numerator has degree 16.  The primary verifier
+uses exact Sturm sequences to prove $H>0$ on
+\begin{equation}\label{eq:safe-intervals}
+ [0,1/400]\ \cup\ [1/75,1/20].
+\end{equation}
+The independent verifier reconstructs the numerator from exact values and
+proves the same statements by Bernstein positivity.  It remains to treat
+\begin{equation}\label{eq:risk-interval}
+ \frac1{400}\le a\le\frac1{75}.
+\end{equation}
+
+\subsection{The large-column support bound}
+
+The weighted-average identity
+\[
+ \frac{q_i}{r_i}=\sum_{j:a_{ij}>0}\frac{a_{ij}}{r_i}\frac1{c_j}
+\]
+shows that some $j_*$ with $a_{ij_*}>0$ satisfies
+\begin{equation}\label{eq:distinguished-column}
+ c_{j_*}\ge\frac{r_i}{q_i}\ge1+h(a).
+\end{equation}
+Thus the large column may be chosen to contain the minimum row.
+
+Put
+\begin{equation}\label{eq:q-support}
+ d(a)=\left(1-\frac{h(a)}7\right)^7,
+ \qquad q(a)=2-\gamma_8-d(a).
+\end{equation}
+For every $\ell$ with $a_{\ell j_*}>0$, cofactor nonnegativity and
+Lemma~\ref{lem:stationarity} give
+\[
+ \frac{R}{r_\ell}
+ =\Phi(A)-\frac{C}{c_{j_*}}+\per A(\ell\mid j_*)
+ \ge2-\gamma_8-d(a)=q(a).
+\]
+Indeed, $C/c_{j_*}$ is the product of the other seven column sums, whose sum
+is at most $7-h(a)$.  On \eqref{eq:risk-interval}, $q$ is increasing and the
+verifier checks exactly that $q(1/400)>1$.  Since $R\le1$,
+\begin{equation}\label{eq:row-cap}
+ r_\ell\le\frac{R}{q(a)}\le\frac1{q(a)}<1
+ \qquad(a_{\ell j_*}>0).
+\end{equation}
+
+Let $z$ be the number of zero entries in column $j_*$.  Full
+indecomposability excludes a column with only one positive entry, while
+\eqref{eq:row-cap} excludes a full-support column.  Hence $1\le z\le6$.
+The support consists of the distinguished row of sum $1-a$ and $7-z$ other
+rows bounded by $1/q(a)$.  Optimizing the remaining $z$ row sums by AM--GM
+gives
+\begin{equation}\label{eq:Uz}
+ R\le U_z(a):=(1-a)q(a)^{-(7-z)}
+ \left(\frac{7+a-(7-z)/q(a)}{z}\right)^z.
+\end{equation}
+The objective is increasing in each capped row sum: after the uncapped rows
+are equalized, their mean is greater than $1$, whereas every capped row is
+less than $1$.
+
+The matrix $B$ also inherits the $z\times1$ zero rectangle in column $j_*$.
+Hwang's staircase theorem therefore gives
+\begin{equation}\label{eq:Mz}
+ \per B\ge M_z:=
+ \max\left\{L_8,\frac{\gamma_{8-z}\gamma_7}{\gamma_{7-z}}\right\}.
+\end{equation}
+The six exact values used by the verifier are
+\[
+ \left(
+ \frac{12249}{5000000},
+ \frac{15625}{6353046},
+ \frac{36864}{14706125},
+ \frac{1215}{470596},
+ \frac{320}{117649},
+ \frac{360}{117649}
+ \right).
+\]
+Consequently
+\begin{equation}\label{eq:R0}
+ R\ge R_{0,z}(a):=2-\gamma_8+M_z(1-a)^8-g(h(a)).
+\end{equation}
+
+Here is the exact polynomial certificate for
+$R_{0,z}>U_z$.  Put
+\begin{align*}
+ e&=1-(2-\gamma_8)a,
+ &t&=e-\frac{(1-\gamma_8)a}{7},\\
+ Q&=(2-\gamma_8)e^7-t^7=e^7q(a),\\
+ S_z&=(2-\gamma_8+M_z(1-a)^8)e^8
+       -(e+(1-\gamma_8)a)t^7=e^8R_{0,z}(a),\\
+ W_z&=(7+a)Q-(7-z)e^7.
+\end{align*}
+All denominators are positive on \eqref{eq:risk-interval}, and the desired
+inequality is equivalent to
+\begin{equation}\label{eq:Gz}
+ G_z(a):=z^zQ^7S_z
+ -(1-a)e^{8+7(7-z)}W_z^z>0.
+\end{equation}
+Each $G_z$ has degree 65.  The primary verifier expands it directly and
+converts it to the degree-65 Bernstein basis on $[1/400,1/75]$; every one of
+the $6\cdot66=396$ coefficients is strictly positive.  The smallest is
+approximately $7.1630735\cdot10^{-6}$.  The independent audit reconstructs
+each $G_z$ from 66 exact values and obtains the same positivity conclusion.
+This contradicts \eqref{eq:Uz}--\eqref{eq:R0} for every possible support and
+excludes all marginal cuts.
+
+\section{Proper tight cuts}
+
+Suppose now that $u,v\ge1$.  Define
+\[
+ \varepsilon_r=\sum_{i\in I^c}r_i-u,
+ \qquad
+ \varepsilon_c=\sum_{j\in J^c}c_j-v.
+\]
+For positive numbers $x_1,\dots,x_n$ of sum $n$ and product $X$, binary
+Pinsker after grouping a subset and its complement gives
+\[
+ \left(\sum_{i\in S}x_i-|S|\right)^2
+ \le-\frac n2\log X.
+\]
+Applying this to the row and column sums, then using Cauchy--Schwarz and
+\eqref{eq:product-lower}, yields
+\begin{equation}\label{eq:T}
+ |\varepsilon_r|+|\varepsilon_c|
+ \le\sqrt{-n\log(RC)}
+ \le\sqrt{\frac{n\delta}{1-\delta}}=:T.
+\end{equation}
+The cut identity
+\[
+ s(A[I,J])=k-\varepsilon_r-\varepsilon_c+s(A[I^c,J^c])
+\]
+therefore implies
+\begin{equation}\label{eq:lambda-proper}
+ \lambda\ge1-\frac Tk.
+\end{equation}
+For $n=8$, the exact inequality $n\gamma_n<1-\gamma_n$ ensures $T<1\le k$.
+
+Because $B$ is doubly stochastic,
+\[
+ s(B[I,J])=k+s(B[I^c,J^c])\ge k.
+\]
+Tightness and \eqref{eq:domination} give the reverse bound after
+multiplication by $\lambda$, so equality holds and $B[I^c,J^c]=0$.  Thus $B$
+lies on the staircase face with a prescribed $u\times v$ zero block.
+Hwang's theorem gives
+\begin{equation}\label{eq:nu}
+ \per B\ge\nu_{n;u,v}
+ :=\frac{\gamma_{n-u}\gamma_{n-v}}{\gamma_k},
+ \qquad k=n-u-v,
+\end{equation}
+where $\gamma_0=1$.  The barycenter has
+$(n-v)!(n-u)!/k!$ supported permutations, all of the same weight; both
+verifiers reconstruct this count exactly.
+
+Using \eqref{eq:lambda-proper}, Bernoulli's inequality, and
+$1-\delta\ge1-\gamma_n$ gives
+\begin{align*}
+ \nu_{n;u,v}\left(1-\frac Tk\right)^n-(\gamma_n-\delta)
+ &\ge \nu_{n;u,v}-\gamma_n+\delta
+ -\frac{n\nu_{n;u,v}}k
+  \sqrt{\frac{n\delta}{1-\gamma_n}}.
+\end{align*}
+Completing the square in $\sqrt\delta$ gives the uniform lower bound
+\begin{equation}\label{eq:eta}
+ \eta_{n;u,v}
+ :=\nu_{n;u,v}-\gamma_n
+ -\frac{n^3\nu_{n;u,v}^2}{4k^2(1-\gamma_n)}.
+\end{equation}
+Both verifiers check $\eta_{8;u,v}>0$ for 15 of the 21 proper cuts
+\[
+ u,v\ge1,\qquad u+v\le7.
+\]
+The smallest positive value occurs at $(u,v,k)=(1,1,6)$, where
+\[
+ \nu_{8;1,1}=\frac{33592320}{13841287201},
+ \qquad
+ \eta_{8;1,1}=
+ \frac{8906343086971146850328025}
+ {3283430548652519934896577839104}>0.
+\]
+The only cuts not settled by \eqref{eq:eta} have $k=1$, namely
+$(u,v)=(1,6),(2,5),(3,4)$ and their transposes.  We treat them with a
+sharper product estimate.
+
+For $1\le d\le7$, define
+\begin{equation}\label{eq:Fd}
+ F_d(x)=\left(1+\frac{x}{d}\right)^d
+        \left(1-\frac{x}{8-d}\right)^{8-d}.
+\end{equation}
+If a $d$-element subset of the row sums has sum $d+x$, AM--GM separately
+within the subset and its complement gives $R\le F_d(x)$; the analogous
+statement holds for $C$.  Put
+\begin{equation}\label{eq:cd}
+ (c_1,c_2,c_3,c_4,c_5,c_6,c_7)
+ =\left(\frac12,\frac3{10},\frac14,\frac6{25},
+        \frac14,\frac3{10},\frac12\right).
+\end{equation}
+The exact polynomial inequalities
+\begin{equation}\label{eq:subset-deficit}
+ 1-F_d(x)\ge c_dx^2
+ \qquad\left(-\frac1{10}\le x\le\frac1{10},\quad1\le d\le7\right)
+\end{equation}
+are checked as follows.  After removing the double zero at $x=0$, each
+$1-F_d(x)-c_dx^2$ has a degree-six quotient.  Both verifiers convert that
+quotient to the Bernstein basis on $[-1/10,1/10]$ and find every coefficient
+strictly positive; the smallest coefficient is
+\[
+ \frac{640006399}{65536000000}>0.
+\]
+They also check $1-F_d(\pm1/10)>\gamma_8$ for every $d$.  Since $F_d$ is
+strictly increasing to $1$ on the negative side of zero and strictly
+decreasing from $1$ on the positive side, the lower bounds
+$R,C\ge1-\delta\ge1-\gamma_8$ localize every relevant subset deviation to
+$(-1/10,1/10)$.
+
+Now take one of the six remaining cuts and write
+\[
+ x=\varepsilon_r,\qquad y=\varepsilon_c,
+ \qquad s=x+y,\qquad u+v=7.
+\]
+The cut identity gives $\lambda\ge1-s$.  If $s\le0$, then $\lambda\ge1$;
+as $\lambda\le1$, the domination argument makes $A$ doubly stochastic and
+contradicts the boundary assumption.  Hence $s>0$.  From
+\eqref{eq:shared-deficit}, \eqref{eq:Fd}, and
+\eqref{eq:subset-deficit},
+\begin{equation}\label{eq:s-deficit}
+ \delta\ge\rho+\sigma
+ \ge c_ux^2+c_vy^2
+ \ge \frac{c_uc_v}{c_u+c_v}s^2=:c_{u,v}s^2.
+\end{equation}
+For the three cases up to transposition,
+\begin{equation}\label{eq:ceff}
+ c_{1,6}=\frac3{16},\qquad
+ c_{2,5}=\frac3{22},\qquad
+ c_{3,4}=\frac6{49}.
+\end{equation}
+The weakest of these constants and the exact inequality
+$2401\gamma_8<6$ imply $s<1/7$.
+
+Here the staircase core has size one, so \eqref{eq:nu} becomes
+$\nu_{8;u,v}=\gamma_{8-u}\gamma_{8-v}$.  Therefore
+\[
+ P\ge\nu_{8;u,v}(1-s)^8,
+ \qquad
+ P=\gamma_8-\delta\le\gamma_8-c_{u,v}s^2.
+\]
+For $(u,v)=(1,6),(2,5),(3,4)$, both verifiers prove
+\begin{equation}\label{eq:Kuv}
+ K_{u,v}(s):=\nu_{8;u,v}(1-s)^8-\gamma_8+c_{u,v}s^2>0
+ \qquad\left(0\le s\le\frac17\right)
+\end{equation}
+by exact degree-eight Bernstein coefficients on the two intervals
+$[0,1/14]$ and $[1/14,1/7]$.  Transposition handles the other three cuts.
+The smallest coefficient among these certificates is
+\[
+ \frac{13183225395}{259172170858496}>0.
+\]
+Thus \eqref{eq:Kuv} contradicts the preceding upper bound for $P$, and all
+proper cuts are excluded.
+
+The whole, marginal, and proper cases exhaust every tight cut.  No boundary
+global maximizer exists.  Hwang's positive-support theorem identifies the
+sole remaining maximizer as $J_8/8$, proving Theorem~\ref{thm:main}.
+
+\section{Exact computational audit}
+
+No floating-point value is used in a correctness decision.  The primary
+standard-library verifier checks:
+\begin{enumerate}
+\item the bivariate two-zero equalization identity and its sign;
+\item the degree-eight permanent polynomial and the lower bound \eqref{eq:L}
+by a rational Sturm sequence;
+\item denominator and endpoint signs, \eqref{eq:D-endpoint}, and zero Sturm
+roots for the degree-16 numerator on both safe intervals;
+\item $q(1/400)>1$, all six support bounds $M_z$, and all 396 exact
+Bernstein coefficients in \eqref{eq:Gz};
+\item all seven subset-deficit inequalities \eqref{eq:subset-deficit}, their
+endpoint localization checks, and the three polynomials \eqref{eq:Kuv};
+\item the staircase barycenter count for all 21 proper cuts and all 15
+positive values in \eqref{eq:eta}.
+\end{enumerate}
+
+The independent verifier imports no code from the primary verifier.  It uses
+a literal exact Ryser sum for the two-zero matrices and Bernstein positivity
+on 256 subintervals.  It reconstructs the marginal numerator from 17 exact
+values and each support polynomial from 66 exact scalar values.  It also
+reconstructs each subset quotient from seven values and each exceptional-cut
+polynomial from nine values, checks off-grid values, and proves positivity by
+an independently implemented Bernstein conversion.  Thus none of the
+principal polynomial expansions is shared.
+
+The integration test runs both programs in ordinary and optimized Python mode
+and requires identical output.  Three mutations inflate $L_8$, omit the
+staircase support improvement in the marginal argument, and replace
+$c_4=6/25$ by the false value $1/4$; the appropriate independently mutated
+program must reject each change.
+
+\section{Scope and status}
+
+This note establishes dimension 8.  Together with the other exact working
+proofs in the accompanying repository, the covered dimensions are
+\[
+ 4,5,8,9,10,11,12,13,14,15,16.
+\]
+Dimensions $6,7$ are not settled by these materials.  The present result
+should be described as an exact computer-assisted working proof until the
+mathematical reduction and both programs have undergone independent peer
+review.
+
+\section*{Reproducibility}
+
+From the \texttt{n8} directory, run
+\begin{verbatim}
+python3 -I verify_dittert_n8.py
+python3 -I audit_dittert_n8_stdlib.py
+python3 -I test_n8_package.py
+\end{verbatim}
+The verifier final lines must be
+\begin{verbatim}
+CERTIFIED
+INDEPENDENT AUDIT CERTIFIED
+\end{verbatim}
+and the tests must report \texttt{OK}.
+
+\begin{thebibliography}{99}
+
+\bibitem{CheonWanless2012}
+G.-S. Cheon and I. M. Wanless,
+\emph{Some results towards the Dittert conjecture on permanents},
+Linear Algebra Appl. 436 (2012), 791--801.
+\href{https://doi.org/10.1016/j.laa.2010.08.041}{doi:10.1016/j.laa.2010.08.041}.
+
+\bibitem{Egorychev1981}
+G. P. Egorychev,
+\emph{Solution of the van der Waerden problem for permanents},
+Soviet Math. Dokl. 23 (1981), 619--622.
+
+\bibitem{Falikman1981}
+D. I. Falikman,
+\emph{A proof of van der Waerden's conjecture on the permanent of a stochastic matrix},
+Mat. Zametki 29 (1981), 931--938.
+
+\bibitem{Hwang1985}
+S.-G. Hwang,
+\emph{Minimum permanent on faces of staircase type of the polytope of doubly stochastic matrices},
+Linear Multilinear Algebra 18 (1985), 271--306.
+\href{https://doi.org/10.1080/03081088508817694}{doi:10.1080/03081088508817694}.
+
+\bibitem{Hwang1986}
+S.-G. Hwang,
+\emph{A note on a conjecture on permanents},
+Linear Algebra Appl. 76 (1986), 31--44.
+\href{https://doi.org/10.1016/0024-3795(86)90212-0}{doi:10.1016/0024-3795(86)90212-0}.
+
+\bibitem{Li1990}
+C.-K. Li,
+\emph{On certain convex matrix sets},
+Discrete Math. 79 (1990), 323--326.
+
+\bibitem{Minc1984}
+H. Minc,
+\emph{Minimum permanents of doubly stochastic matrices with prescribed zero entries},
+Linear Multilinear Algebra 15 (1984), 225--243.
+\href{https://doi.org/10.1080/03081088408817592}{doi:10.1080/03081088408817592}.
+
+\bibitem{PulaSongWanless2011}
+K. Pula, S.-Z. Song, and I. M. Wanless,
+\emph{Minimum permanents on two faces of the polytope of doubly stochastic matrices},
+Linear Algebra Appl. 434 (2011), 232--238.
+\href{https://doi.org/10.1016/j.laa.2010.08.022}{doi:10.1016/j.laa.2010.08.022}.
+
+\end{thebibliography}
+
+\end{document}

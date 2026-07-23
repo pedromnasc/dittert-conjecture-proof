@@ -3,7 +3,7 @@
 ## Published mathematical inputs
 
 The proof note uses the same established structural results as the dimension
-10 package:
+9 and 10 packages:
 
 1. Hwang's positive-maximizer theorem for the Dittert functional.
 2. Cheon and Wanless's exclusions of partly decomposable maximizers and of a
@@ -14,19 +14,25 @@ The proof note uses the same established structural results as the dimension
    independent prescribed zeroes.
 6. The van der Waerden permanent theorem and equality case.
 
-Full citations are in the proof note. The support-stationarity equation and
-the new large-column support-count argument are proved directly there.
+Full citations are in the proof note. The support-stationarity equation,
+large-column support argument, and grouped line-sum deficit argument are
+proved directly there.
 
 ## Computational scope
 
-The primary and independent standard-library programs check the two-zero
-equalization and permanent bound, the complete marginal intervals, all seven
-large-column support cases, the staircase barycenter counts, and all 28 proper
-tight cuts with exact rational arithmetic. The independent program imports no
-primary-verifier code and reconstructs the key polynomials from exact values.
+The primary and independent standard-library programs check:
 
-No floating-point number is used in a proof decision. The printed decimal
-approximations are diagnostic only.
+- the two-zero equalization and permanent bound;
+- both safe marginal intervals;
+- all six large-column support cases on the remaining interval;
+- seven grouped subset-deficit inequalities and their localization checks;
+- all 21 proper tight cuts, including the six exceptional one-dimensional
+  cores; and
+- all staircase-face barycenter counts used in those arguments.
+
+The independent program imports no primary-verifier code and reconstructs the
+key polynomials from exact values. No floating-point number is used in a proof
+decision; printed decimal approximations are diagnostic only.
 
 ## Status
 
