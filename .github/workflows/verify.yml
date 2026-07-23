@@ -57,6 +57,7 @@ jobs:
         run: |
           python verify_primary.py
           python test_alternate_certificate.py
+          python test_rejects_corrupt_certificate.py
 
       - name: Ensure n=5 optimized mode is rejected
         working-directory: n5

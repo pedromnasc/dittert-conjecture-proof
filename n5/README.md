@@ -36,6 +36,10 @@ minimum and maximum residuals as regression values. Rebuilt certificates may
 have different extrema; they are accepted whenever their independently
 reconstructed residual coefficients are all strictly positive.
 
+CI also exercises both directions explicitly: a non-bit-identical certificate
+with positive residuals is accepted, while a structurally valid certificate
+with a corrupted Cholesky entry is rejected.
+
 The proof note has not yet undergone independent peer review. The certificate
 is exact and reproducible, but both the mathematical reduction and verifier
 should receive independent scrutiny before the result is cited as established.
