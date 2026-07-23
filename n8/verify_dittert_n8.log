@@ -1,0 +1,19 @@
+Dittert n=8 exact dimension-specific verifier
+gamma_8 = 315/131072 ~= 0.002403259277343750000000
+two-zero L_8 = 12249/5000000 ~= 0.002449800000000000000000
+two-zero face Sturm roots = 0
+marginal feasible interval = [0, 1/20]
+D(1/20)-gamma_8 = 31066010128748897714515579088148324990959343304369359334772692757/40520942451449309887913781059751119458104721638804156712089600000000
+safe marginal Sturm roots = [0, 0]
+marginal risk interval = [1/400, 1/75]
+support cases checked = 6
+support permanent bounds = [Fraction(12249, 5000000), Fraction(15625, 6353046), Fraction(36864, 14706125), Fraction(1215, 470596), Fraction(320, 117649), Fraction(360, 117649)]
+smallest support Bernstein coefficient ~= 0.000007163073537816014167
+H(0) = 476577/10240000000 ~= 0.000046540722656250000000
+subset-deficit cases checked = 7
+smallest subset Bernstein coefficient ~= 0.009765722640991210937500
+generic proper cuts checked = 15
+special proper cuts checked = 6
+smallest special Bernstein coefficient ~= 0.000050866670411916398732
+smallest generic eta at (u,v,k)=(1,1,6), nu=33592320/13841287201: 8906343086971146850328025/3283430548652519934896577839104 ~= 0.000002712511489127188028
+CERTIFIED
