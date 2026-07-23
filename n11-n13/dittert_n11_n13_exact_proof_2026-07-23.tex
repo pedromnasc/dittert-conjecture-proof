@@ -1,0 +1,479 @@
+\documentclass[11pt]{article}
+\usepackage[a4paper,margin=27mm]{geometry}
+\usepackage{amsmath,amssymb,amsthm,mathtools}
+\usepackage{booktabs,array,longtable}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\hypersetup{colorlinks=true,linkcolor=blue!55!black,citecolor=blue!55!black,urlcolor=blue!55!black}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{5pt plus 1pt}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\theoremstyle{remark}
+\newtheorem{remark}[theorem]{Remark}
+\newcommand{\per}{\operatorname{per}}
+\newcommand{\one}{\mathbf 1}
+\newcommand{\OmegaDS}{\Omega}
+\newcommand{\Kn}{K_n}
+\newcommand{\gam}{\gamma_n}
+\newcommand{\PhiD}{\Phi}
+\newcommand{\sA}{s}
+\newcommand{\RR}{\mathbb R}
+\newcommand{\QQ}{\mathbb Q}
+
+\title{Dittert's conjecture in dimensions 11, 12, and 13\\
+\large An exact computer-assisted boundary-exclusion proof}
+\author{Working note}
+\date{23 July 2026}
+
+\begin{document}
+\maketitle
+
+\begin{center}
+\fbox{\parbox{0.90\textwidth}{\textbf{Status.} This is a reproducible working proof, not a peer-reviewed publication. All dimension-specific comparisons are checked with exact rational/integer arithmetic by two independent programs. The proof depends on published structural and permanent-minimization theorems cited below.}}
+\end{center}
+
+\begin{abstract}
+For a nonnegative $n\times n$ matrix $A$ whose entries sum to $n$, let $r_i,c_j$ be its row and column sums and set
+\[
+ \PhiD(A)=\prod_i r_i+\prod_j c_j-\per A.
+\]
+Dittert's conjecture asserts that $\PhiD(A)\le 2-n!/n^n$, with equality only at the uniform matrix $J_n/n$. We prove this for $n=11,12,13$. The main device is the largest scalar $\lambda$ for which $A/\lambda$ is doubly superstochastic. A cut attaining $\lambda$ is either marginal, in which case $\lambda$ is controlled by the smallest row or column sum, or proper, in which case tightness forces a rectangular zero block in a dominated doubly stochastic matrix. The first case uses an exact lower bound on the two-independent-zero face; the second uses Hwang's staircase-face theorem. The remaining inequalities reduce to finitely many rational comparisons and three univariate Sturm calculations.
+\end{abstract}
+
+\section{Statement and published inputs}
+Let
+\[
+ K_n=\left\{A=(a_{ij})\in\RR_{\ge0}^{n\times n}:\sum_{i,j}a_{ij}=n\right\},
+ \qquad
+ \gamma_n=\frac{n!}{n^n}.
+\]
+For $A\in K_n$, write
+\[
+ R=\prod_{i=1}^n r_i,\qquad C=\prod_{j=1}^n c_j,\qquad P=\per A,
+\]
+where $r_i$ and $c_j$ are the row and column sums. Thus $\PhiD(A)=R+C-P$ and
+\[
+ \PhiD(J_n/n)=2-\gamma_n.
+\]
+
+\begin{theorem}\label{thm:main}
+For $n\in\{11,12,13\}$ and every $A\in K_n$,
+\[
+ \PhiD(A)\le 2-\gamma_n,
+\]
+with equality if and only if $A=J_n/n$.
+\end{theorem}
+
+We use the following published results.
+\begin{enumerate}
+\item Hwang proved that the only possible positive $\PhiD$-maximizer in $K_n$ is $J_n/n$ \cite{Hwang1986}.
+\item Cheon and Wanless proved that a partly decomposable matrix cannot maximize $\PhiD$, and that a maximizer cannot have its complete zero set equal, up to row and column permutations, to one proper rectangular block \cite[Theorems 3.2 and 3.7]{CheonWanless2012}.
+\item Li's cut characterization says that a nonnegative $n\times n$ matrix $S$ is doubly superstochastic if and only if
+\[
+ \sum_{i\in I,j\in J}s_{ij}\ge |I|+|J|-n
+\]
+for all $I,J\subseteq[n]$ \cite{Li1990}; see also \cite[Lemma 2.2]{CheonWanless2012}.
+\item On a staircase face of the Birkhoff polytope, the barycenter minimizes the permanent \cite{Hwang1985}.
+\item The standard averaging method for the face with two prescribed independent zeroes permits a permanent minimizer to be chosen with equal last $m$ rows and equal last $m$ columns; this is recalled and used explicitly by Pula, Song, and Wanless \cite[Section 2]{PulaSongWanless2011}.
+\item The van der Waerden permanent theorem gives $\per B\ge\gamma_n$ for every doubly stochastic $B$, with equality only at $J_n/n$ \cite{Egorychev1981,Falikman1981}.
+\end{enumerate}
+
+\section{Boundary structure and the joint deficit}
+Because $K_n$ is compact, $\PhiD$ has a global maximizer. By Hwang's positive-support theorem, a nonuniform maximizer must be a boundary matrix.
+
+\begin{lemma}[Two independent zeroes]\label{lem:independent-zeros}
+Every boundary $\PhiD$-maximizer has two zero entries in distinct rows and distinct columns.
+\end{lemma}
+\begin{proof}
+Suppose a nonempty zero set contains no such pair. Fix a zero at $(i,j)$. Every other zero shares row $i$ or column $j$. If there were both a zero $(i,j')$ with $j'\ne j$ and a zero $(i',j)$ with $i'\ne i$, those two zeroes would be in distinct rows and columns. Hence all zeroes lie in one row or all lie in one column.
+
+If that row or column is entirely zero, the matrix contains a $1\times(n-1)$ or $(n-1)\times1$ zero submatrix and is partly decomposable. Otherwise its complete zero set is one proper rectangular block. Both possibilities are excluded for a maximizer by Cheon--Wanless. Therefore two independent zeroes must occur.
+\end{proof}
+
+Assume for contradiction that a boundary maximizer $A$ satisfies
+\[
+ \PhiD(A)\ge 2-\gamma_n.
+\]
+Since the row sums and column sums each have arithmetic mean $1$, AM--GM gives $R,C\le1$. Thus $P\le\gamma_n$. Write
+\[
+ P=\gamma_n-\delta,\qquad 0\le\delta\le\gamma_n,
+\]
+and put $R=1-\rho$, $C=1-\sigma$. The assumed lower bound on $\PhiD$ gives
+\begin{equation}\label{eq:joint-deficit}
+ \rho+\sigma\le\delta.
+\end{equation}
+In particular,
+\begin{equation}\label{eq:product-lower}
+ R\ge1-\delta,\qquad C\ge1-\delta,
+ \qquad RC=(1-\rho)(1-\sigma)\ge1-\delta.
+\end{equation}
+This single shared deficit budget is essential below.
+
+\section{The maximal Li scaling and its tight cut}
+For $I,J\subseteq[n]$, let $s(A[I,J])$ denote the sum of the entries in the indicated submatrix. Define
+\begin{equation}\label{eq:lambda-def}
+ \lambda=
+ \min_{\substack{I,J\subseteq[n]\\k:=|I|+|J|-n>0}}
+ \frac{s(A[I,J])}{k}.
+\end{equation}
+A maximizer is fully indecomposable by the Cheon--Wanless partly-decomposable exclusion. Hence every submatrix occurring in \eqref{eq:lambda-def} has positive sum, so $\lambda>0$. Taking $I=J=[n]$ shows $\lambda\le1$.
+
+By Li's theorem, $A/\lambda$ is doubly superstochastic. Therefore there is a doubly stochastic matrix $B$ with
+\begin{equation}\label{eq:domination}
+ \lambda B\le A
+ \quad\text{entrywise},
+ \qquad
+ P=\per A\ge\lambda^n\per B.
+\end{equation}
+Choose $I,J$ attaining the minimum in \eqref{eq:lambda-def}. Put
+\[
+ u=n-|I|,\qquad v=n-|J|,\qquad k=n-u-v>0.
+\]
+We distinguish the whole cut $(u,v)=(0,0)$, marginal cuts (exactly one of $u,v$ is zero), and proper cuts ($u,v\ge1$).
+
+If $u=v=0$, then $\lambda=1$. Since $B\le A$ and both matrices have total sum $n$, $A=B$ is doubly stochastic. The van der Waerden theorem gives $P\ge\gamma_n$, and equality would force the positive matrix $J_n/n$, contradicting that $A$ is a boundary matrix. Hence the whole cut cannot be minimizing.
+
+\section{Two elementary deficit estimates}
+\begin{lemma}[Subset-sum estimate]\label{lem:subset}
+Let $x_1,\dots,x_n>0$ have sum $n$ and product $X$. For a subset $S\subseteq[n]$, write
+\[
+ \sum_{i\in S}x_i=|S|+\varepsilon.
+\]
+Then
+\begin{equation}\label{eq:subset-product}
+ \varepsilon^2\le-\frac n2\log X.
+\end{equation}
+\end{lemma}
+\begin{proof}
+Let $p_i=x_i/n$ and let $q_i=1/n$. Then
+\[
+ D(q\|p)=\sum_i\frac1n\log\frac{1/n}{x_i/n}
+ =-\frac1n\log X.
+\]
+Under the two-cell partition $S,S^c$, the probability difference is $|\varepsilon|/n$. The data-processing inequality and the binary Pinsker inequality give
+\[
+ -\frac1n\log X=D(q\|p)\ge 2\frac{\varepsilon^2}{n^2},
+\]
+which is \eqref{eq:subset-product}.
+\end{proof}
+
+\begin{lemma}[A smallest line sum]\label{lem:marginal-deficit}
+If positive $x_1,\dots,x_n$ have sum $n$, product $X$, and $\min_i x_i=1-a$ with $0\le a<1$, then
+\begin{equation}\label{eq:a-product}
+ a^2\le\frac{2(n-1)}n(-\log X).
+\end{equation}
+Consequently, if $X\ge1-\delta$, then
+\begin{equation}\label{eq:a-delta}
+ a^2\le\frac{2(n-1)\delta}{n(1-\delta)}.
+\end{equation}
+\end{lemma}
+\begin{proof}
+AM--GM on the remaining $n-1$ variables gives
+\[
+ X\le(1-a)\left(1+\frac a{n-1}\right)^{n-1}.
+\]
+Set
+\[
+ f(a)=-\log(1-a)-(n-1)\log\left(1+\frac a{n-1}\right).
+\]
+If $g(a)=f(a)-na^2/[2(n-1)]$, then $g(0)=0$ and
+\[
+ g'(a)=\frac{na^2(n-2+a)}{(n-1)(1-a)(n-1+a)}\ge0.
+\]
+Thus $-\log X\ge f(a)\ge na^2/[2(n-1)]$. The last assertion follows from
+$-\log(1-\delta)\le\delta/(1-\delta)$.
+\end{proof}
+
+\section{The two-independent-zero permanent gap}
+Let $\Omega_n^{(2)}$ denote the face of the doubly stochastic polytope specified by
+$b_{12}=b_{21}=0$.
+
+\begin{proposition}[Reduction to one variable]\label{prop:twozero-poly}
+Let $m=n-2\ge2$. The minimum of the permanent on $\Omega_n^{(2)}$ equals the minimum, on
+\[
+ \frac{m-2}{m^2}\le x\le\frac1m,
+\]
+of
+\begin{equation}\label{eq:Pnx}
+ P_n(x)=m!x^{m-2}\left(x^2a^2+2mxab^2+m(m-1)b^4\right),
+\end{equation}
+where
+\begin{equation}\label{eq:ab}
+ a=\frac{2-m+m^2x}{2},\qquad b=\frac{1-mx}{2}.
+\end{equation}
+\end{proposition}
+\begin{proof}
+By the averaging method cited above, a permanent minimizer can be chosen in the form
+\[
+ Y=
+ \begin{pmatrix}
+ x_1&0&a_1\one^{\mathsf T}\\
+ 0&x_2&a_2\one^{\mathsf T}\\
+ a_1\one&a_2\one&xJ_m
+ \end{pmatrix},
+ \qquad
+ x_i=1-ma_i,
+ \qquad
+ a_1+a_2+mx=1.
+\]
+Put $s=a_1+a_2$ and $p=a_1a_2$. Apart from the positive factor $m!x^{m-2}$, direct expansion gives
+\begin{equation}\label{eq:E-sp}
+ E_m(s,p)=x^2(1-ms+m^2p)+mx\bigl(s^2-(2+ms)p\bigr)+m(m-1)p^2,
+ \qquad x=\frac{1-s}{m}.
+\end{equation}
+For fixed $s$,
+\begin{equation}\label{eq:dEdp}
+ \frac{\partial E_m}{\partial p}
+ =2m(m-1)p+(m+1)s^2-ms-1.
+\end{equation}
+Since $p\le s^2/4$ and $0\le s\le2/m$, the right-hand side is at most
+\[
+ D_m(s)=\frac{(m^2+m+2)s^2-2ms-2}{2}.
+\]
+The polynomial $D_m$ is convex, while
+\[
+ D_m(0)=-1,
+ \qquad
+ D_m(2/m)=-1+\frac2m+\frac4{m^2}<0
+ \quad(m\ge4).
+\]
+Therefore $\partial E_m/\partial p<0$ throughout the admissible region. The minimum for fixed $s$ occurs at the largest possible $p$, namely $p=s^2/4$, so $a_1=a_2=b$. Solving the doubly stochastic constraints gives \eqref{eq:ab} and the stated interval for $x$. Counting the permanent terms according to whether zero, one, or two of the two distinguished diagonal entries are selected gives \eqref{eq:Pnx}.
+\end{proof}
+
+For the three dimensions, choose
+\begin{equation}\label{eq:L-values}
+ L_{11}=\frac{113}{800000},\qquad
+ L_{12}=\frac{1083}{20000000},\qquad
+ L_{13}=\frac{10349}{500000000}.
+\end{equation}
+
+\begin{proposition}[Exact two-zero bounds]\label{prop:L}
+For $n=11,12,13$, every $B\in\Omega_n^{(2)}$ satisfies
+\[
+ \per B>L_n>\gamma_n.
+\]
+\end{proposition}
+\begin{proof}
+For each $n$, the exact verifier constructs the polynomial $P_n(x)-L_n\in\QQ[x]$. It checks that the polynomial is positive at both endpoints of its complete admissible interval and, by an exact rational Sturm sequence, that it has no root in the interval. Hence it is positive everywhere. The second independent verifier reconstructs $P_n$ by exact Ryser permanent evaluation at $n+1$ rational points, then repeats the root count with SymPy's independent exact Sturm implementation. The exact outputs are summarized in Table~\ref{tab:cert}.
+\end{proof}
+
+\section{Marginal tight cuts}
+Suppose exactly one of $u,v$ is zero. Then the ratio in \eqref{eq:lambda-def} is the average of a nonempty set of row sums or column sums. Since singleton marginal cuts are also allowed, a minimizing marginal cut has
+\[
+ \lambda=\min_i r_i
+ \quad\text{or}\quad
+ \lambda=\min_j c_j.
+\]
+Write $\lambda=1-a$. By Lemma~\ref{lem:marginal-deficit}, \eqref{eq:product-lower}, and $\delta\le\gamma_n$,
+\begin{equation}\label{eq:U}
+ a\le U:=\sqrt{\frac{2(n-1)\delta}{n(1-\delta)}}
+ \le\sqrt{\frac{2(n-1)\delta}{n(1-\gamma_n)}}.
+\end{equation}
+For $n=11,12,13$ the exact inequality
+\[
+ \frac{2(n-1)}n\gamma_n<1-\gamma_n
+\]
+holds, so $U<1$.
+
+The dominated matrix $B$ inherits the two independent zeroes of $A$. After row and column permutations, Proposition~\ref{prop:L} applies. Therefore, using Bernoulli's inequality,
+\begin{align}
+ P&\ge\lambda^n\per B>L_n(1-U)^n,\\
+ L_n(1-U)^n-(\gamma_n-\delta)
+ &\ge L_n-\gamma_n+\delta
+ -nL_n\sqrt{\frac{2(n-1)\delta}{n(1-\gamma_n)}}.
+\end{align}
+Completing the square in $\sqrt\delta$ gives the uniform lower bound
+\begin{equation}\label{eq:eta-marg}
+ \eta_n^{\mathrm{marg}}
+ :=L_n-\gamma_n-
+ \frac{n(n-1)L_n^2}{2(1-\gamma_n)}.
+\end{equation}
+The exact verifier checks $\eta_n^{\mathrm{marg}}>0$ for all three dimensions. Hence the right-hand side is positive, contradicting $P=\gamma_n-\delta$.
+
+\section{Proper tight cuts}
+Now suppose $u,v\ge1$. Let
+\[
+ \varepsilon_r=\sum_{i\in I^c}r_i-u,
+ \qquad
+ \varepsilon_c=\sum_{j\in J^c}c_j-v.
+\]
+Lemma~\ref{lem:subset}, followed by Cauchy--Schwarz and \eqref{eq:product-lower}, yields
+\begin{align}
+ |\varepsilon_r|+|\varepsilon_c|
+ &\le\sqrt{2(\varepsilon_r^2+\varepsilon_c^2)}\\
+ &\le\sqrt{-n\log(RC)}
+ \le\sqrt{\frac{n\delta}{1-\delta}}
+ =:T.
+\end{align}
+The identity
+\begin{equation}\label{eq:cut-identity}
+ s(A[I,J])
+ =k-\varepsilon_r-\varepsilon_c+s(A[I^c,J^c])
+\end{equation}
+therefore gives
+\begin{equation}\label{eq:lambda-proper}
+ \lambda=\frac{s(A[I,J])}{k}\ge1-\frac{T}{k}.
+\end{equation}
+For the dimensions at hand, $n\gamma_n<1-\gamma_n$, so $T<1\le k$.
+
+Because $B$ is doubly stochastic,
+\[
+ s(B[I,J])=k+s(B[I^c,J^c])\ge k.
+\]
+On the other hand, tightness and \eqref{eq:domination} give
+\[
+ \lambda s(B[I,J])\le s(A[I,J])=\lambda k.
+\]
+Thus equality holds and
+\begin{equation}\label{eq:forced-zero-block}
+ B[I^c,J^c]=0.
+\end{equation}
+So $B$ lies on the face with a prescribed $u\times v$ zero block.
+
+After permuting rows and columns, this is a two-step staircase face. Hwang's theorem says that its barycenter minimizes the permanent. The barycenter is
+\begin{equation}\label{eq:stair-bary}
+ H_{n;u,v}=
+ \begin{pmatrix}
+ \dfrac1{n-v}J_{u,n-v}&0_{u,v}\\[2mm]
+ \dfrac{k}{(n-u)(n-v)}J_{n-u,n-v}&
+ \dfrac1{n-u}J_{n-u,v}
+ \end{pmatrix}.
+\end{equation}
+There are $(n-v)!(n-u)!/k!$ supported permutations, each of the same weight. Hence
+\begin{equation}\label{eq:nu}
+ \per B\ge\nu_{n;u,v}:=\per H_{n;u,v}
+ =\frac{\gamma_{n-u}\gamma_{n-v}}{\gamma_k},
+ \qquad k=n-u-v,
+\end{equation}
+where $\gamma_0:=1$.
+
+Using \eqref{eq:lambda-proper}, Bernoulli's inequality, and $1-\delta\ge1-\gamma_n$,
+\begin{align}
+ \nu_{n;u,v}\left(1-\frac Tk\right)^n-(\gamma_n-\delta)
+ &\ge \nu_{n;u,v}-\gamma_n+\delta
+ -\frac{n\nu_{n;u,v}}k
+ \sqrt{\frac{n\delta}{1-\gamma_n}}.
+\end{align}
+Completing the square gives
+\begin{equation}\label{eq:eta-proper}
+ \eta_{n;u,v}:=
+ \nu_{n;u,v}-\gamma_n-
+ \frac{n^3\nu_{n;u,v}^2}{4k^2(1-\gamma_n)}.
+\end{equation}
+The verifier checks $\eta_{n;u,v}>0$ for every pair
+\[
+ u,v\ge1,\qquad u+v\le n-1,
+\]
+namely $45$, $55$, and $66$ proper cuts for $n=11,12,13$. This again contradicts $P=\gamma_n-\delta$.
+
+The whole, marginal, and proper cases exhaust every tight cut. Thus a boundary maximizer cannot exist. Hwang's positive-support theorem identifies the sole remaining maximizer as $J_n/n$, proving Theorem~\ref{thm:main}.
+
+\section{Exact computational certificate}
+No floating-point value is used in a correctness decision. The primary verifier uses Python's standard-library \texttt{Fraction} class and checks:
+\begin{enumerate}
+\item the two-variable equalization identity \eqref{eq:dEdp};
+\item the exact polynomial \eqref{eq:Pnx};
+\item positivity of $P_n-L_n$ at both interval endpoints;
+\item zero roots in the interval by an exact rational Sturm sequence;
+\item $L_n>\gamma_n$ and $\eta_n^{\mathrm{marg}}>0$;
+\item the barycenter permanent formula \eqref{eq:nu};
+\item $\eta_{n;u,v}>0$ for every proper cut.
+\end{enumerate}
+
+The independent audit does not import the primary verifier. It uses exact SymPy polynomials and Sturm sequences, and it validates $P_n$ at $n+1$ distinct rational points by a literal exact Ryser permanent calculation. Since every entry of the matrix is affine in $x$, its permanent has degree at most $n$; agreement at $n+1$ points proves the polynomial identity.
+
+\begin{table}[ht]
+\centering
+\small
+\caption{Exact certificate summary. Decimal values are displayed only for readability.}
+\label{tab:cert}
+\begin{tabular}{@{}cclllc@{}}
+\toprule
+$n$ & $L_n$ & $L_n-\gamma_n$ & $\eta_n^{\rm marg}$ & $\min\eta_{n;u,v}$ & minimizing $(u,v,k)$\\
+\midrule
+11 & $113/800000$ & $1.3440511\cdot10^{-6}$ & $2.4656165\cdot10^{-7}$ & $5.9999275\cdot10^{-7}$ & $(1,1,9)$\\
+12 & $1083/20000000$ & $4.2678291\cdot10^{-7}$ & $2.3324583\cdot10^{-7}$ & $2.0401292\cdot10^{-7}$ & $(1,1,10)$\\
+13 & $10349/500000000$ & $1.3830175\cdot10^{-7}$ & $1.0488530\cdot10^{-7}$ & $6.7829049\cdot10^{-8}$ & $(1,1,11)$\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+For the Sturm checks, the complete admissible intervals are
+\[
+ \left[\frac7{81},\frac19\right],\qquad
+ \left[\frac2{25},\frac1{10}\right],\qquad
+ \left[\frac9{121},\frac1{11}\right]
+\]
+for $n=11,12,13$, respectively. In each case both endpoint values of $P_n-L_n$ are positive and the exact root count is zero.
+
+\section{Scope and remaining range}
+The proof above establishes the three dimensions $11,12,13$. It does not by itself address $5\le n\le10$. The scalar marginal inequality \eqref{eq:eta-marg} is the bottleneck when the same constants and face bound are used below $n=11$; a sharper marginal estimate or a different permanent gap is required there.
+
+As of the cited June 2026 preprint, Pang proves the conjecture for $n\ge17$ \cite{Pang2026}. The present note should be treated as a new, exact computer-assisted working proof until it has been independently reviewed.
+
+\section*{Reproducibility}
+Run
+\begin{verbatim}
+python3 -I verify_dittert_n11_n13.py
+python3 -I audit_dittert_n11_n13_sympy.py
+\end{verbatim}
+The expected final lines are
+\begin{verbatim}
+ALL CASES CERTIFIED
+INDEPENDENT AUDIT CERTIFIED
+\end{verbatim}
+
+\begin{thebibliography}{99}
+\bibitem{CheonWanless2012}
+G.-S. Cheon and I. M. Wanless,
+\emph{Some results towards the Dittert conjecture on permanents},
+Linear Algebra Appl. 436 (2012), 791--801.
+\href{https://doi.org/10.1016/j.laa.2010.08.041}{doi:10.1016/j.laa.2010.08.041}.
+
+\bibitem{Egorychev1981}
+G. P. Egorychev,
+\emph{Solution of the van der Waerden problem for permanents},
+Soviet Math. Dokl. 23 (1981), 619--622.
+
+\bibitem{Falikman1981}
+D. I. Falikman,
+\emph{A proof of van der Waerden's conjecture on the permanent of a stochastic matrix},
+Mat. Zametki 29 (1981), 931--938.
+
+\bibitem{Hwang1985}
+S.-G. Hwang,
+\emph{Minimum permanent on faces of staircase type of the polytope of doubly stochastic matrices},
+Linear Multilinear Algebra 18 (1985), 271--306.
+\href{https://doi.org/10.1080/03081088508817694}{doi:10.1080/03081088508817694}.
+
+\bibitem{Hwang1986}
+S.-G. Hwang,
+\emph{A note on a conjecture on permanents},
+Linear Algebra Appl. 76 (1986), 31--44.
+\href{https://doi.org/10.1016/0024-3795(86)90212-0}{doi:10.1016/0024-3795(86)90212-0}.
+
+\bibitem{Li1990}
+C.-K. Li,
+\emph{On certain convex matrix sets},
+Discrete Math. 79 (1990), 323--326.
+
+\bibitem{Pang2026}
+Z. Pang,
+\emph{Proof of Dittert's conjecture for dimensions $n\ge17$},
+arXiv:2606.01531 (2026).
+
+\bibitem{PulaSongWanless2011}
+K. Pula, S.-Z. Song, and I. M. Wanless,
+\emph{Minimum permanents on two faces of the polytope of doubly stochastic matrices},
+Linear Algebra Appl. 434 (2011), 232--238.
+\href{https://doi.org/10.1016/j.laa.2010.08.022}{doi:10.1016/j.laa.2010.08.022}.
+\end{thebibliography}
+
+\end{document}
