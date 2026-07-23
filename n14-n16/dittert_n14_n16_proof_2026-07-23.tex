@@ -1,0 +1,462 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb,amsthm,mathtools}
+\usepackage{booktabs}
+\usepackage{microtype}
+\usepackage[hidelinks]{hyperref}
+\usepackage{enumitem}
+
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\theoremstyle{remark}
+\newtheorem{remark}[theorem]{Remark}
+
+\newcommand{\per}{\operatorname{per}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\one}{\mathbf{1}}
+\newcommand{\Om}{\Omega}
+
+\title{Dittert's Conjecture in Dimensions 14, 15, and 16\\
+via a Two-Zero Boundary Gap}
+\author{Reproducible working note}
+\date{23 July 2026}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Let $K_n$ be the set of nonnegative $n\times n$ matrices whose entries sum to $n$, and let
+\[
+ \Phi(A)=\prod_{i=1}^n r_i+\prod_{j=1}^n c_j-\per(A),
+\]
+where $r_i$ and $c_j$ are the row and column sums.  We prove, by a short exact
+computer-assisted calculation, that Dittert's conjecture holds for
+$n=14,15,16$:
+\[
+ \Phi(A)\le 2-\frac{n!}{n^n},
+\]
+with equality only at the matrix all of whose entries are $1/n$.
+The proof combines the joint-deficit scaling lemma with two facts about the
+boundary: a maximizing matrix must contain two zeroes in distinct rows and
+columns, and the minimum permanent on that two-zero face of the Birkhoff
+polytope reduces to a one-variable polynomial.  Exact rational certificates
+for the three polynomial lower bounds and the final scalar comparisons are
+included with this note.
+\end{abstract}
+
+\section{Setup and known results}
+
+Let
+\[
+ K_n=\left\{A=(a_{ij})\in\R_{\ge0}^{n\times n}:\sum_{i,j}a_{ij}=n\right\},
+ \qquad
+ \gamma_n=\frac{n!}{n^n},
+\]
+and put $U_n=n^{-1}\one\one^{\mathsf T}$.  Dittert's conjecture asserts that
+\begin{equation}\label{eq:dittert}
+ \Phi(A)\le \Phi(U_n)=2-\gamma_n,
+\end{equation}
+with equality only at $U_n$.
+
+We use the following established results.
+\begin{enumerate}[label=(\roman*)]
+ \item Every positive global maximizer of $\Phi$ on $K_n$ is $U_n$ \cite{Hwang1986}.
+ \item A partly decomposable matrix cannot be a global maximizer of $\Phi$, and
+ the complete zero set of a global maximizer cannot be one rectangular block
+ \cite[Theorems 3.2 and 3.7]{CheonWanless2012}.
+ \item A nonnegative matrix $S$ is doubly superstochastic if and only if
+ \begin{equation}\label{eq:li}
+   s(S[I,J])\ge |I|+|J|-n
+ \end{equation}
+ for every pair of row and column sets $I,J$; here $s$ denotes the sum of the
+ indicated submatrix \cite[Lemma 2.2]{CheonWanless2012}.
+\end{enumerate}
+
+\section{A boundary maximizer has two independent zeroes}
+
+\begin{lemma}\label{lem:zeros}
+Let $Z$ be a nonempty set of positions in an $n\times n$ array.  If $Z$ does
+not contain two positions in distinct rows and distinct columns, then $Z$ is
+contained in one row or in one column.
+\end{lemma}
+
+\begin{proof}
+Choose $(i_0,j_0)\in Z$.  If every element of $Z$ lies in row $i_0$, there is
+nothing to prove.  Otherwise choose $(i_1,j_0)\in Z$ with $i_1\ne i_0$; the
+column must be $j_0$ by the hypothesis.  If $(i,j)\in Z$ had $j\ne j_0$, then
+it would have to share a row with both $(i_0,j_0)$ and $(i_1,j_0)$, which is
+impossible.  Hence every element of $Z$ lies in column $j_0$.
+\end{proof}
+
+\begin{corollary}\label{cor:twozeros}
+Every boundary global maximizer of $\Phi$ contains two zero entries in
+distinct rows and distinct columns.
+\end{corollary}
+
+\begin{proof}
+By Lemma~\ref{lem:zeros}, otherwise all zeroes lie in one row or one column.
+If that row or column is entirely zero, the matrix is partly decomposable.  If
+not, the complete zero set is one proper rectangular block.  Both alternatives
+are excluded by the results quoted in Section~1.
+\end{proof}
+
+\section{Joint-deficit scaling}
+
+The following is the joint-deficit scaling observation used independently for
+the case $n=16$ in \cite{Kafidov2026}.  We reproduce the proof because the
+shared deficit budget is central to the extension to $n=14,15$.
+
+\begin{lemma}[Joint-deficit scaling]\label{lem:scaling}
+Suppose $A\in K_n$ satisfies
+\[
+ \Phi(A)\ge 2-\gamma_n,
+ \qquad
+ \per(A)=\gamma_n-\delta,
+ \qquad 0\le\delta<1.
+\]
+Set
+\[
+ t=\sqrt{\frac{n\delta}{1-\delta}}.
+\]
+If $t<1$, then $(1-t)^{-1}A$ is doubly superstochastic.
+\end{lemma}
+
+\begin{proof}
+Write
+\[
+ R=\prod_i r_i=1-\rho,
+ \qquad
+ C=\prod_j c_j=1-\sigma.
+\]
+AM--GM gives $R,C\le1$.  The assumed lower bound on $\Phi$ gives
+\begin{equation}\label{eq:budget}
+ \rho+\sigma\le\delta.
+\end{equation}
+
+Let $I$ be a set of $k$ rows and write
+$\sum_{i\in I}r_i=k+\varepsilon$.  Applying AM--GM inside $I$ and its
+complement gives
+\[
+ R\le\left(1+\frac{\varepsilon}{k}\right)^k
+       \left(1-\frac{\varepsilon}{n-k}\right)^{n-k}.
+\]
+With $p=k/n$ and $q=(k+\varepsilon)/n$, the logarithm of the right-hand side
+is $-nD(p\|q)$.  Binary Pinsker, $D(p\|q)\ge2(p-q)^2$, therefore yields
+\[
+ |\varepsilon|
+ \le \sqrt{-\frac n2\log(1-\rho)}
+ \le \sqrt{\frac{n\rho}{2(1-\delta)}}.
+\]
+The same estimate holds for every column subset, with $\sigma$ in place of
+$\rho$.
+
+Now take row and column sets $I,J$ and put
+$p_0=|I|+|J|-n>0$.  By inclusion--exclusion and nonnegativity,
+\begin{align*}
+ s(A[I,J])
+ &\ge p_0
+ -\sqrt{\frac{n\rho}{2(1-\delta)}}
+ -\sqrt{\frac{n\sigma}{2(1-\delta)}}\\
+ &\ge p_0-\sqrt{\frac{n(\rho+\sigma)}{1-\delta}}
+ \ge p_0-t,
+\end{align*}
+where we used \eqref{eq:budget}.  Since $p_0$ is a positive integer,
+$p_0-t\ge(1-t)p_0$.  Thus $(1-t)^{-1}A$ satisfies \eqref{eq:li}.  Pairs with
+$p_0\le0$ satisfy it automatically.
+\end{proof}
+
+\section{The permanent gap on the two-zero face}
+
+Let $\Omega_n^{(2)}$ be the set of doubly stochastic $n\times n$ matrices
+having prescribed zeroes in two distinct rows and columns.  Permuting columns,
+we may take those zeroes to be positions $(1,2)$ and $(2,1)$.
+
+Put $m=n-2$.  In the notation of Pula--Song--Wanless this is the face
+$\Omega(V_{m,2})$ \cite{PulaSongWanless2011}.  Minc's averaging theorem for
+permanent minimizers with repeated support rows and columns implies that a
+minimizer on this face may be chosen in the block form
+\cite{Minc1984,PulaSongWanless2011}
+\begin{equation}\label{eq:Ygeneral}
+ Y=
+ \begin{pmatrix}
+ x_1&0&a_1\one_m^{\mathsf T}\\
+ 0&x_2&a_2\one_m^{\mathsf T}\\
+ a_1\one_m&a_2\one_m&xJ_m
+ \end{pmatrix},
+ \qquad
+ x_i=1-ma_i,
+ \qquad
+ a_1+a_2+mx=1.
+\end{equation}
+Here $0\le a_i\le1/m$.  Although Minc already resolved this face, the
+following short calculation supplies the particular one-variable reduction
+needed below and avoids importing any unrecorded formula for the minimizer.
+
+\begin{lemma}[Equalization of the exceptional parameters]\label{lem:equalize}
+For $m\ge4$, among matrices of the form \eqref{eq:Ygeneral} with fixed
+$s=a_1+a_2$, the permanent is minimized when $a_1=a_2=s/2$.
+\end{lemma}
+
+\begin{proof}
+Put $p=a_1a_2$ and $x=(1-s)/m$.  Counting permanent terms according to whether
+both, one, or neither of the two entries $x_1,x_2$ are used gives
+\begin{equation}\label{eq:generalper}
+ \per(Y)=m!x^{m-2}\Bigl[
+ x^2x_1x_2+mx(x_1a_2^2+x_2a_1^2)+m(m-1)a_1^2a_2^2
+ \Bigr].
+\end{equation}
+The symmetric identities
+\[
+ x_1x_2=1-ms+m^2p,
+ \qquad
+ x_1a_2^2+x_2a_1^2=s^2-(2+ms)p
+\]
+show that the bracket in \eqref{eq:generalper}, as a polynomial in $p$, has
+derivative
+\begin{equation}\label{eq:pderivative}
+ 2m(m-1)p+(m+1)s^2-ms-1.
+\end{equation}
+The constraints $0\le a_i\le1/m$ imply $0\le s\le2/m$, while
+$p\le s^2/4$.  Since \eqref{eq:pderivative} increases with $p$, it is at most
+\[
+ D_m(s)=\frac{(m^2+m+2)s^2-2ms-2}{2}.
+\]
+The quadratic $D_m$ is convex, and
+\[
+ D_m(0)=-1,
+ \qquad
+ D_m(2/m)=-1+\frac2m+\frac4{m^2}<0
+ \quad(m\ge4).
+\]
+Hence \eqref{eq:pderivative} is strictly negative throughout the feasible
+region.  For fixed $s$, increasing $p$ therefore decreases the permanent, and
+the largest possible value $p=s^2/4$ is attained exactly at
+$a_1=a_2=s/2$.
+\end{proof}
+
+It follows that a minimizing matrix may be chosen as
+\begin{equation}\label{eq:Bmx}
+ B_m(x)=
+ \begin{pmatrix}
+ a&0&b\one_m^{\mathsf T}\\
+ 0&a&b\one_m^{\mathsf T}\\
+ b\one_m&b\one_m&xJ_m
+ \end{pmatrix},
+ \quad
+ a=\frac{2-m+m^2x}{2},\quad b=\frac{1-mx}{2},
+\end{equation}
+where
+\begin{equation}\label{eq:xrange}
+ \frac{m-2}{m^2}\le x\le\frac1m.
+\end{equation}
+A second reading of the three cases in \eqref{eq:generalper} gives
+\begin{equation}\label{eq:simplePn}
+ \per B_m(x)=m!x^{m-2}
+ \bigl(x^2a^2+2mxab^2+m(m-1)b^4\bigr).
+\end{equation}
+Equivalently,
+\begin{equation}\label{eq:Pn}
+ P_n(x):=\per B_m(x)
+ =\frac{(m!)^2}{16}\sum_{i=0}^2
+ \binom2i\frac{2^i}{(m-2+i)!}
+ (2-m+m^2x)^i(1-mx)^{4-2i}x^{m-2+i}.
+\end{equation}
+
+For the three dimensions, exact expansion gives
+\begin{align*}
+P_{14}(x)&=119750400x^{10}
+ (953856x^4-289728x^3+33220x^2-1704x+33),\\
+P_{15}(x)&=1556755200x^{11}
+ (1513733x^4-427739x^3+45582x^2-2171x+39),\\
+P_{16}(x)&=10897286400x^{12}
+ (4648336x^4-1227744x^3+122200x^2-5432x+91).
+\end{align*}
+Their derivatives factor as
+\begin{align*}
+P'_{14}(x)&=718502400x^9(84x-5)
+ (26496x^3-5896x^2+440x-11),\\
+P'_{15}(x)&=20237817600x^{10}(195x-11)
+ (8957x^3-1857x^2+129x-3),\\
+P'_{16}(x)&=305124019200x^{11}(56x-3)
+ (47432x^3-9204x^2+598x-13).
+\end{align*}
+The three cubic factors are strictly increasing on $\mathbb R$: the
+discriminants of their derivatives are respectively
+\[
+ -847616,\qquad -71640,\qquad -1517568.
+\]
+The linear factors are positive throughout the intervals \eqref{eq:xrange},
+and the cubic endpoint values are
+\[
+\begin{array}{c|cc}
+ n&c_n((m-2)/m^2)&c_n(1/m)\\ \hline
+14&-1/216&1/18\\
+15&-2/2197&2/169\\
+16&-1/343&2/49.
+\end{array}
+\]
+Thus each $P_n$ has one global minimum on its admissible interval.  Exact
+rational brackets for the critical points are
+\begin{align*}
+ n=14:&\quad
+ \frac{70587793823672}{10^{15}}<x_*<
+ \frac{70587793823673}{10^{15}},\\
+ n=15:&\quad
+ \frac{65989565762012}{10^{15}}<x_*<
+ \frac{65989565762013}{10^{15}},\\
+ n=16:&\quad
+ \frac{61946716891694}{10^{15}}<x_*<
+ \frac{61946716891695}{10^{15}}.
+\end{align*}
+Exact rational interval-Horner evaluation on these brackets gives
+\begin{equation}\label{eq:Ln}
+ \begin{array}{c|c|c}
+ n&\displaystyle \min_{B\in\Omega_n^{(2)}}\per(B)> & L_n\\ \hline
+14&7890634087/10^{15}&789/10^8\\
+15&3001151594/10^{15}&3001/10^9\\
+16&1139154849/10^{15}&1139/10^9.
+ \end{array}
+\end{equation}
+The first verifier supplied with this note checks the displayed
+factorizations, monotonicity, critical-point brackets, and outward rational
+interval evaluations using only integer and rational arithmetic.  An
+independent verifier instead applies Sturm's theorem directly to
+$P_n(x)-L_n$ on the full interval \eqref{eq:xrange}.
+
+\section{Boundary exclusion}
+
+\begin{proposition}\label{prop:criterion}
+Fix $n\ge4$.  Suppose every $B\in\Omega_n^{(2)}$ satisfies $\per(B)\ge L$ and
+\begin{equation}\label{eq:eta}
+ \eta:=L-\gamma_n-\frac{n^3L^2}{4(1-\gamma_n)}>0.
+\end{equation}
+Then a global maximizer of $\Phi$ on $K_n$ cannot lie on the boundary.
+\end{proposition}
+
+\begin{proof}
+Let $A$ be a boundary global maximizer.  Since
+$\Phi(A)\ge\Phi(U_n)$ and the two product terms are at most $1$, write
+\[
+ \per(A)=\gamma_n-\delta,
+ \qquad 0\le\delta\le\gamma_n.
+\]
+If $\delta=0$, both product bounds are equalities, so $A$ is doubly
+stochastic; the equality case in the van der Waerden theorem then gives
+$A=U_n$, contrary to the assumed zero.  Hence $0<\delta\le\gamma_n$.
+
+By Corollary~\ref{cor:twozeros}, $A$ has two independent zeroes.  Set
+$t=\sqrt{n\delta/(1-\delta)}$.  For $n=14,15,16$ we have
+$(n+1)\gamma_n<1$, and therefore $t<1$.  Lemma~\ref{lem:scaling} gives a
+doubly stochastic matrix $B\le (1-t)^{-1}A$.  The two zeroes of $A$ are also
+zeroes of $B$, so $\per(B)\ge L$.  Monotonicity and homogeneity of the
+permanent give
+\begin{equation}\label{eq:lowerper}
+ \gamma_n-\delta=\per(A)\ge L(1-t)^n.
+\end{equation}
+
+On the other hand, Bernoulli's inequality and $\delta\le\gamma_n$ imply
+\begin{align*}
+L(1-t)^n-(\gamma_n-\delta)
+&\ge L-\gamma_n+\delta-nL\sqrt{\frac{n\delta}{1-\delta}}\\
+&\ge L-\gamma_n+x^2-nL\sqrt{\frac{n}{1-\gamma_n}}\,x\\
+&\ge L-\gamma_n-\frac{n^3L^2}{4(1-\gamma_n)}
+=\eta>0,
+\end{align*}
+where $x=\sqrt\delta$ and the final step completes the square.  This
+contradicts \eqref{eq:lowerper}.
+\end{proof}
+
+For the values in \eqref{eq:Ln}, exact rational arithmetic gives
+\[
+\begin{array}{c|c}
+ n&\eta_n\\ \hline
+14&\displaystyle
+\frac{1801777553768587612545302097}
+{957898641732692266551875000000000000}>0\\[3mm]
+15&\displaystyle
+\frac{172396552001926445448721}
+{24213708253338147072000000000000}>0\\[3mm]
+16&\displaystyle
+\frac{4164538286276424752117963756736721}
+{1208924448418671074738176000000000000000000}>0.
+\end{array}
+\]
+Numerically these margins are approximately
+$1.88097\cdot10^{-9}$, $7.11979\cdot10^{-9}$, and
+$3.44483\cdot10^{-9}$, respectively.
+
+\begin{theorem}\label{thm:main}
+For $n\in\{14,15,16\}$ and every $A\in K_n$,
+\[
+ \Phi(A)\le 2-\frac{n!}{n^n},
+\]
+with equality if and only if $A=U_n$.
+\end{theorem}
+
+\begin{proof}
+A global maximizer exists by compactness.  Proposition~\ref{prop:criterion}
+and the exact checks above exclude a boundary maximizer.  Every global
+maximizer is therefore positive, and Hwang's theorem identifies it uniquely
+as $U_n$.
+\end{proof}
+
+\begin{corollary}
+Together with Pang's result for $n\ge17$ \cite{Pang2026}, Dittert's conjecture
+holds for every $n\ge14$.
+\end{corollary}
+
+\section{Reproducibility}
+
+The accompanying files are:
+\begin{itemize}
+ \item \texttt{verify\_dittert\_n14\_n16.py}: a standard-library-only exact
+ verifier.  It reconstructs the two-parameter expression
+ \eqref{eq:generalper}, verifies Lemma~\ref{lem:equalize}, reconstructs
+ \eqref{eq:Pn}, checks all displayed factorizations, proves the critical-point
+ brackets and interval lower bounds, and verifies \eqref{eq:eta} as a
+ rational inequality.
+ \item \texttt{audit\_dittert\_n14\_n16\_sympy.py}: an independent exact audit.
+ It derives the block permanent separately, verifies the equalization step,
+ checks the permanent polynomial by exact Ryser evaluation at $n+1$ rational
+ points, and uses Sturm root counts to prove $P_n-L_n>0$ on each complete
+ admissible interval.
+\end{itemize}
+Neither program uses a floating-point number in a correctness decision.
+Both terminate with a certification message for all three dimensions.
+
+\begin{thebibliography}{9}
+\bibitem{CheonWanless2012}
+G.-S. Cheon and I. M. Wanless,
+\emph{Some results towards the Dittert conjecture on permanents},
+Linear Algebra Appl. 436 (2012), 791--801.
+
+\bibitem{Hwang1986}
+S.-G. Hwang,
+\emph{A note on a conjecture on permanents},
+Linear Algebra Appl. 76 (1986), 31--44.
+
+\bibitem{Kafidov2026}
+B. Kafidov,
+\emph{Dittert's conjecture in dimension 16 via a joint-deficit scaling lemma},
+arXiv:2607.19439v1 (2026).
+
+\bibitem{Minc1984}
+H. Minc,
+\emph{Minimum permanents of doubly stochastic matrices with prescribed zero
+entries},
+Linear and Multilinear Algebra 15 (1984), 225--243.
+
+\bibitem{Pang2026}
+Z. Pang,
+\emph{Proof of Dittert's conjecture for dimensions $n\ge17$},
+arXiv:2606.01531v1 (2026).
+
+\bibitem{PulaSongWanless2011}
+K. Pula, S.-Z. Song, and I. M. Wanless,
+\emph{Minimum permanents on two faces of the polytope of doubly stochastic matrices},
+Linear Algebra Appl. 434 (2011), 232--238.
+\end{thebibliography}
+
+\end{document}
