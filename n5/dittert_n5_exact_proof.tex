@@ -1,0 +1,236 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage{amsmath,amssymb,amsthm,mathtools}
+\usepackage{booktabs}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage[hidelinks]{hyperref}
+\usepackage{fancyhdr}
+
+\definecolor{notegray}{RGB}{245,246,248}
+\newtheorem{theorem}{Theorem}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{lemma}[theorem]{Lemma}
+\newcommand{\permanent}{\operatorname{per}}
+\newcommand{\R}{\mathbb{R}}
+
+\setlength{\headheight}{14pt}
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{Dittert conjecture for $n=5$}
+\rhead{Exact computer-assisted proof note}
+\cfoot{\thepage}
+
+\title{An Exact Computer-Assisted Proof of the\\Dittert Conjecture for $n=5$}
+\author{Pedro Paulo Marques do Nascimento}
+\date{23 July 2026\\[0.4em]
+\small Licensed under \href{https://creativecommons.org/licenses/by/4.0/}{CC BY 4.0}}
+
+\hypersetup{
+  pdftitle={An Exact Computer-Assisted Proof of the Dittert Conjecture for n=5},
+  pdfauthor={Pedro Paulo Marques do Nascimento},
+  pdfsubject={Exact working proof and reproducible certificate},
+  pdfkeywords={Dittert conjecture, permanent, computer-assisted proof, exact certificate}
+}
+
+\begin{document}
+\maketitle
+
+\begin{center}
+\fcolorbox{black!25}{notegray}{\parbox{0.90\textwidth}{\small
+\textbf{Review status.} This document reports a new exact computational
+certificate produced in an interactive research session.  The complete
+integer certificate and verifier are included.  The argument has not yet
+undergone independent peer review and should be checked before being cited as
+an established result.
+}}
+\end{center}
+
+\begin{abstract}
+For a nonnegative $5\times5$ matrix $A$ whose entries sum to $5$, let
+\[
+ \Phi(A)=\prod_{i=1}^{5}r_i+\prod_{j=1}^{5}c_j-\permanent(A),
+\]
+where $r_i$ and $c_j$ are the row and column sums.  We give an exact
+computer-assisted proof that
+\[
+ \Phi(A)\le 2-\frac{5!}{5^5}=\frac{6130}{3125},
+\]
+with equality only at the matrix $J_5$ whose entries are $1/5$.  Published
+structural results reduce the boundary case to the face with two zero entries
+in distinct rows and columns.  On that face an integer
+multiplier--sum-of-squares certificate proves a strict quintic inequality.
+The verifier checks all $80\,730$ quintic coefficients using arbitrary-precision
+integer arithmetic.  The smallest residual coefficient is approximately
+$5.4206471\cdot10^{-5}$.
+\end{abstract}
+
+\section{Statement and boundary reduction}
+Let
+\[
+ K_5=\left\{A=(a_{ij})\in\R_{\ge0}^{5\times5}:
+             \sum_{i,j}a_{ij}=5\right\}.
+\]
+
+\begin{theorem}\label{thm:main}
+For every $A\in K_5$,
+\[
+ \Phi(A)\le\frac{6130}{3125}.
+\]
+Equality holds if and only if $A=J_5$.
+\end{theorem}
+
+We use two published structural facts.  Hwang proved that the only possible
+positive $\Phi$-maximizer is $J_n$ \cite{Hwang1986}.  Cheon and Wanless proved
+that a partly decomposable matrix cannot maximize $\Phi$, and that the
+complete zero set of a maximizer cannot, up to row and column permutations,
+be one proper rectangular block \cite[Theorems~3.2 and~3.7]{CheonWanless2012}.
+
+\begin{lemma}\label{lem:zeros}
+If a nonempty set of matrix positions contains no two positions in distinct
+rows and distinct columns, then all its positions lie in one row or all lie
+in one column.
+\end{lemma}
+
+\begin{proof}
+Choose $(i,j)$ in the set.  Every other position shares row $i$ or column $j$
+with it.  A position of each type would give two positions in distinct rows
+and columns, so only one type can occur.
+\end{proof}
+
+\begin{proposition}\label{prop:reduction}
+It is enough to prove
+\[
+ \Phi(A)<\frac{6130}{3125}
+ \qquad(A\in K_5,\ a_{11}=a_{22}=0).
+ \tag{1}\label{eq:facegoal}
+\]
+\end{proposition}
+
+\begin{proof}
+Compactness gives a global maximizer.  A positive maximizer is $J_5$ by
+Hwang's theorem.  If a boundary maximizer had no two independent zeroes,
+Lemma~\ref{lem:zeros} would put its complete zero set in one row or column.
+If the whole row or column vanished the matrix would be partly decomposable;
+otherwise its zero set would be one proper rectangular block.  Both cases are
+excluded by Cheon--Wanless.  Row and column permutations therefore place two
+zeroes at $(1,1)$ and $(2,2)$, where \eqref{eq:facegoal} excludes the boundary
+maximizer.
+\end{proof}
+
+\section{The quintic on the two-zero face}
+Put $X=A/5$.  Its entries sum to $1$.  On the face $x_{11}=x_{22}=0$, index
+the remaining $23$ entries by
+\[
+ V=\{(i,j):1\le i,j\le5\}\setminus\{(1,1),(2,2)\}.
+\]
+Write $S=\sum_{v\in V}x_v$.  Let $\mathcal E$ be the collection of
+five-element subsets of $V$ that meet all five rows or all five columns, and
+put
+\[
+ F(x)=\sum_{E\in\mathcal E}\prod_{v\in E}x_v.
+ \tag{2}
+\]
+There are $2000$ row transversals, $2000$ column transversals, and $78$
+allowed permutation transversals, hence $|\mathcal E|=3922$.
+
+Expanding the row-sum and column-sum products shows that their common
+square-free monomials are exactly the permanent terms.  Consequently
+\[
+ \prod_i R_i+\prod_j C_j-\permanent(X)=F(x),
+ \qquad \Phi(A)=5^5F(x).
+ \tag{3}
+\]
+Thus \eqref{eq:facegoal} is equivalent to
+\[
+ G(x):=\frac{1226}{5^9}S^5-F(x)>0
+ \qquad(x\ge0,\ S=1).
+ \tag{4}\label{eq:G}
+\]
+
+\section{Exact certificate}
+Let $m_2(x)$ be the vector of all $276$ quadratic monomials in the $23$
+variables.  The automorphism group $\Gamma$ of the two-zero face has order
+$144$.  Its action has three vertex orbits, of sizes $2$, $12$, and $9$;
+choose representatives $u_1,u_2,u_3$.
+
+The certificate archive contains integer lower-triangular matrices
+\[
+ \widehat L_p\in\mathbb Z^{276\times276}\qquad(1\le p\le3),
+\]
+and sets $L_p=2^{-28}\widehat L_p$.  The verifier expands the identity
+\begin{align}
+ G(x)
+ &=\sum_{p=1}^3\sum_{\gamma\in\Gamma}
+ x_{\gamma u_p}
+ \left\|L_p^{\mathsf T}m_2(\gamma x)\right\|_2^2
+ +\frac1D\sum_{|\alpha|=5}R_\alpha x^\alpha,
+ \tag{5}\label{eq:certificate}\\
+ D&=5^9 2^{56}=140\,737\,488\,355\,328\,000\,000\,000.\notag
+\end{align}
+It checks all
+\[
+ \binom{23+5-1}{5}=80\,730
+\]
+coefficients and finds
+\[
+ \min_{|\alpha|=5}R_\alpha
+ =7\,628\,882\,599\,067\,611\,080>0.
+ \tag{6}
+\]
+
+\begin{proposition}\label{prop:face}
+The strict inequality \eqref{eq:G} holds on the nonnegative simplex $S=1$.
+\end{proposition}
+
+\begin{proof}
+Every term in the first sum of \eqref{eq:certificate} is nonnegative for
+$x\ge0$: it is a nonnegative coordinate times a square norm.  The residual
+polynomial has strictly positive coefficients by \eqref{eq:certificate}--(6).
+Since $S=1$, at least one coordinate is positive, and its fifth-power term
+makes the residual polynomial strictly positive.
+\end{proof}
+
+Proposition~\ref{prop:face} and Proposition~\ref{prop:reduction} prove
+Theorem~\ref{thm:main}.
+
+\section{Exact verification and scope}
+The numerical semidefinite program was used only to discover the three Gram
+matrices.  Each was shifted into the positive-definite cone, Cholesky factored,
+and rounded on a $2^{-28}$ grid.  The saved integer factors are the proof
+object; no floating-point number is used by the verifier for a correctness
+decision.
+
+The verifier independently reconstructs the face, the group, all $3922$
+hyperedges, the three Gram matrices, and every coefficient of
+\eqref{eq:certificate}.  Run, without Python's \texttt{-O} option,
+\begin{verbatim}
+python3 verify_primary.py dittert_n5_exact_certificate.npz
+\end{verbatim}
+The expected final line is \texttt{CERTIFIED}.  The certificate SHA-256 digest
+is
+\begin{center}
+\texttt{373041bda29e1164059a2adbad1aaacd2911784a273629f419972e7ec7b5fdca}.
+\end{center}
+
+The verifier establishes the finite polynomial identity exactly.  It does not
+reprove the published structural theorems used in
+Proposition~\ref{prop:reduction}.  This working proof has not yet undergone
+independent peer review.
+
+\begin{thebibliography}{9}
+\bibitem{Hwang1986}
+S.-G. Hwang,
+\emph{A note on a conjecture on permanents},
+Linear Algebra and its Applications 76 (1986), 31--44.
+
+\bibitem{CheonWanless2012}
+G.-S. Cheon and I. M. Wanless,
+\emph{Some results towards the Dittert conjecture on permanents},
+Linear Algebra and its Applications 436 (2012), 791--801.
+\end{thebibliography}
+
+\end{document}

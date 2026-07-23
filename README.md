@@ -1,10 +1,10 @@
-# Exact working proofs for Dittert's conjecture in dimensions 4, 14, 15, and 16
+# Exact working proofs for Dittert's conjecture in dimensions 4, 5, 14, 15, and 16
 
 [![Exact verification](https://github.com/pedromnasc/dittert-conjecture-proof/actions/workflows/verify.yml/badge.svg)](https://github.com/pedromnasc/dittert-conjecture-proof/actions/workflows/verify.yml)
 
 > **Status:** These are exact, reproducible working proofs. They have not yet
-> undergone formal peer review. This repository covers only `n=4` and
-> `n=14,15,16`; it does not by itself settle the intervening dimensions.
+> undergone formal peer review. This repository covers only `n=4,5` and
+> `n=14,15,16`; it does not by itself settle dimensions `6` through `13`.
 
 For a nonnegative `n x n` matrix `A` whose entries sum to `n`, define
 
@@ -31,6 +31,7 @@ Author: **Pedro Paulo Marques do Nascimento** (`pedromnasc`).
 | Dimensions | Proof note | Audit and reproduction notes |
 | --- | --- | --- |
 | `n=4` | [PDF](n4/dittert_n4_exact_proof.pdf) · [LaTeX](n4/dittert_n4_exact_proof.tex) | [Independent audit report](n4/AUDIT_REPORT.md) · [bundle README](n4/README.md) |
+| `n=5` | [PDF](n5/dittert_n5_exact_proof.pdf) · [LaTeX](n5/dittert_n5_exact_proof.tex) | [exact verifier and reproduction guide](n5/README.md) |
 | `n=14,15,16` | [PDF](n14-n16/dittert_n14_n16_proof_2026-07-23.pdf) · [LaTeX](n14-n16/dittert_n14_n16_proof_2026-07-23.tex) | [reproduction guide](n14-n16/README.md) · [source and citation notes](n14-n16/SOURCE_NOTES.md) |
 
 ## Reproduce the exact checks
@@ -54,6 +55,11 @@ python3 verify_primary.py dittert_n4_exact_certificate.npz
 python3 verify_literal_square_numpy.py dittert_n4_exact_certificate.npz
 python3 verify_literal_square_stdlib.py dittert_n4_exact_certificate.npz
 
+# n=5: check file integrity and the exact quintic certificate
+cd ../n5
+sha256sum -c SHA256SUMS
+python3 verify_primary.py dittert_n5_exact_certificate.npz
+
 # n=14,15,16: check file integrity and run both exact audits
 cd ../n14-n16
 sha256sum -c MANIFEST.sha256
@@ -61,12 +67,13 @@ python3 verify_dittert_n14_n16.py
 python3 audit_dittert_n14_n16_sympy.py
 ```
 
-Run the `n=4` programs without Python's `-O` option. Each assertion-based
+Run the `n=4` and `n=5` programs without Python's `-O` option. Each assertion-based
 verifier rejects optimized mode explicitly so that proof checks cannot be
 silently disabled. The same commands run automatically on every push and pull
 request through GitHub Actions.
 
-The expected final status is `CERTIFIED` for each `n=4` verifier,
+The expected final status is `CERTIFIED` for each `n=4` verifier and the
+`n=5` verifier,
 `ALL CASES CERTIFIED` for the primary `n=14,15,16` verifier, and
 `INDEPENDENT AUDIT CERTIFIED` for the SymPy audit. No floating-point value is
 used in a correctness decision.
@@ -77,7 +84,8 @@ The programs verify the finite algebraic parts of the arguments: certificate
 identities, polynomial calculations, exact rational bounds, and final strict
 inequalities. They do not reprove the published structural theorems used in
 the reductions. Those dependencies and citations are identified in the proof
-notes, the [`n=4` audit report](n4/AUDIT_REPORT.md), and the
+notes, the [`n=4` audit report](n4/AUDIT_REPORT.md), the
+[`n=5` proof note](n5/dittert_n5_exact_proof.tex), and the
 [`n=14,15,16` source notes](n14-n16/SOURCE_NOTES.md).
 
 Independent scrutiny of both the mathematical reductions and the software is
@@ -102,9 +110,9 @@ contents.
 ## Bundle provenance
 
 The repository was assembled on 23 July 2026 from the two original bundles
-below. The untouched archives are retained under `original-bundles/`; the
-reviewed working copies under `n4/` and `n14-n16/` have their own current
-checksum manifests.
+below; the `n=5` certificate was subsequently developed in this repository on
+the same date. The untouched archives are retained under `original-bundles/`;
+the reviewed working directories have their own current checksum manifests.
 
 - [`n=4` original bundle](original-bundles/dittert_n4_audited_bundle_2026-07-23.zip)
 - [`n=14,15,16` original bundle](original-bundles/dittert_n14_n16_exact_proof_bundle_2026-07-23.zip)
