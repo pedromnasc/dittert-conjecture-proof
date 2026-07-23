@@ -20,8 +20,15 @@
 
 \title{Dittert's Conjecture in Dimensions 14, 15, and 16\\
 via a Two-Zero Boundary Gap}
-\author{Reproducible working note}
+\author{Pedro Paulo Marques do Nascimento}
 \date{23 July 2026}
+
+\hypersetup{
+  pdftitle={Dittert's Conjecture in Dimensions 14, 15, and 16 via a Two-Zero Boundary Gap},
+  pdfauthor={Pedro Paulo Marques do Nascimento},
+  pdfsubject={Exact working proof and reproducible verification},
+  pdfkeywords={Dittert conjecture, permanent, exact verification, boundary gap}
+}
 
 \begin{document}
 \maketitle
@@ -136,7 +143,9 @@ AM--GM gives $R,C\le1$.  The assumed lower bound on $\Phi$ gives
 \end{equation}
 
 Let $I$ be a set of $k$ rows and write
-$\sum_{i\in I}r_i=k+\varepsilon$.  Applying AM--GM inside $I$ and its
+$\sum_{i\in I}r_i=k+\varepsilon$.  For $k=0$ or $k=n$ we have
+$\varepsilon=0$, so the required deviation bound is immediate.  We may
+therefore assume $1\le k\le n-1$.  Applying AM--GM inside $I$ and its
 complement gives
 \[
  R\le\left(1+\frac{\varepsilon}{k}\right)^k
@@ -177,7 +186,7 @@ Put $m=n-2$.  In the notation of Pula--Song--Wanless this is the face
 $\Omega(V_{m,2})$ \cite{PulaSongWanless2011}.  Minc's averaging theorem for
 permanent minimizers with repeated support rows and columns implies that a
 minimizer on this face may be chosen in the block form
-\cite{Minc1984,PulaSongWanless2011}
+\cite[Theorem~1]{Minc1984}; see also \cite{PulaSongWanless2011}
 \begin{equation}\label{eq:Ygeneral}
  Y=
  \begin{pmatrix}
@@ -190,9 +199,12 @@ minimizer on this face may be chosen in the block form
  \qquad
  a_1+a_2+mx=1.
 \end{equation}
-Here $0\le a_i\le1/m$.  Although Minc already resolved this face, the
-following short calculation supplies the particular one-variable reduction
-needed below and avoids importing any unrecorded formula for the minimizer.
+Here $0\le a_i\le1/m$.  Only the averaging step of Minc's theorem is used to
+obtain \eqref{eq:Ygeneral}.  Section~2 of Pula--Song--Wanless assumes both block
+parameters exceed $2$, so its equalization theorem is not invoked for the
+present $V_{m,2}$ face.  Although Minc already resolved this face, the following
+short calculation supplies the one-variable reduction directly and avoids
+importing any unrecorded formula for the minimizer.
 
 \begin{lemma}[Equalization of the exceptional parameters]\label{lem:equalize}
 For $m\ge4$, among matrices of the form \eqref{eq:Ygeneral} with fixed

@@ -45,7 +45,7 @@ def mult4(a):
 
 def main():
     ap=argparse.ArgumentParser()
-    ap.add_argument('certificate',nargs='?',type=Path,default=Path(__file__).with_name('dittert_n4_twozero_certificate.npz'))
+    ap.add_argument('certificate',nargs='?',type=Path,default=Path(__file__).with_name('dittert_n4_exact_certificate.npz'))
     ap.add_argument('--json',type=Path)
     a=ap.parse_args(); path=a.certificate.resolve()
     z=np.load(path,allow_pickle=False)
