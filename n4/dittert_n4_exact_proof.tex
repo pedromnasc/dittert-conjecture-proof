@@ -28,15 +28,22 @@
 \cfoot{\thepage}
 
 \title{An Exact Computer-Assisted Proof of the\\Dittert Conjecture for $n=4$}
-\author{Working proof note and reproducible certificate}
+\author{Pedro Paulo Marques do Nascimento}
 \date{22 July 2026}
+
+\hypersetup{
+  pdftitle={An Exact Computer-Assisted Proof of the Dittert Conjecture for n=4},
+  pdfauthor={Pedro Paulo Marques do Nascimento},
+  pdfsubject={Exact working proof and reproducible certificate},
+  pdfkeywords={Dittert conjecture, permanent, computer-assisted proof, exact certificate}
+}
 
 \begin{document}
 \maketitle
 
 \begin{center}
 \fcolorbox{black!25}{notegray}{\parbox{0.90\textwidth}{\small
-\textbf{Review status.} This document reports a new exact computational certificate produced in an interactive research session. The certificate and two independent integer-only verifiers are included. The argument has not yet undergone independent peer review; it should be checked before being cited as an established result.
+\textbf{Review status.} This document reports a new exact computational certificate produced in an interactive research session. The certificate and three exact verifiers are included, two of which independently expand the saved factors as literal squares. The argument has not yet undergone independent peer review; it should be checked before being cited as an established result.
 }}
 \end{center}
 
@@ -175,24 +182,26 @@ Proposition~\ref{prop:face}, Lemma~\ref{lem:hypergraph}, and Proposition~\ref{pr
 \section{Exact verification and reproducibility}
 The numerical semidefinite search was used only to \emph{discover} the factors. It is not part of the proof. The factors were rounded to integers, after which all proof decisions were made with arbitrary-precision integer arithmetic.
 
-Two independent verification programs are supplied:
+Three exact verification programs are supplied:
 \begin{enumerate}[nosep]
  \item The primary verifier forms each exact Gram matrix $LL^{\mathsf T}$, expands the invariant polynomial, validates the symmetry group and all $274$ hyperedges, and checks all $2380$ residual coefficients.
- \item The independent audit never forms a Gram matrix. It expands every column of every factor as a literal square, expands $S^4$ through all $14^4$ ordered products, constructs the two row/column products directly, and enumerates all $24$ permanent permutations.
+ \item The NumPy literal-square audit never forms a Gram matrix. It expands every saved factor literally and constructs the target directly from $S^4$, the row and column products, and all $24$ permanent permutations.
+ \item The third audit repeats the calculation without NumPy and parses the certificate archive itself.
 \end{enumerate}
-Both return the same minimum coefficient in \eqref{eq:minres} and terminate with \texttt{CERTIFIED}. The certificate SHA-256 digest is
+All three return the same minimum coefficient in \eqref{eq:minres} and terminate with \texttt{CERTIFIED}. The certificate SHA-256 digest is
 \begin{center}
 \texttt{d76533bd1c5566ea8d96aa3b58a0b6a8bf3310eb438776ebd99a6bd88d5a11f6}.
 \end{center}
 
-Run either check from the bundle directory:
+Run the checks from the bundle directory, without Python's \texttt{-O} option:
 \begin{verbatim}
-python verify_dittert_n4_certificate.py
-python audit_dittert_n4_twozero_certificate.py
+python verify_primary.py dittert_n4_exact_certificate.npz
+python verify_literal_square_numpy.py dittert_n4_exact_certificate.npz
+python verify_literal_square_stdlib.py dittert_n4_exact_certificate.npz
 \end{verbatim}
 
 \section{Scope and literature context}
-This certificate settles only the case $n=4$. Pang's June 2026 preprint proves the conjecture for all $n\ge17$ and records the intermediate range as open in its literature account \cite{Pang2026}. The published 2024 paper of Udayan and Somasundaram proves that a maximizing matrix in $K_4$ is fully indecomposable, but that stronger structural result is not needed here \cite{UdayanSomasundaram2024}. The present reduction uses only Hwang's positive-support theorem and Cheon--Wanless's two boundary exclusions.
+This certificate settles only the case $n=4$. Separate July 2026 working material distributed with this note treats $n=14,15,16$; Pang's June 2026 preprint treats all $n\ge17$ \cite{Pang2026}, and Kafidov independently treats $n=16$ \cite{Kafidov2026}. No claim about dimensions $5$ through $13$ is made here. The published 2024 paper of Udayan and Somasundaram proves that a maximizing matrix in $K_4$ is fully indecomposable, but that stronger structural result is not needed here \cite{UdayanSomasundaram2024}. The present reduction uses only Hwang's positive-support theorem and Cheon--Wanless's two boundary exclusions.
 
 \begin{thebibliography}{9}
 \bibitem{Hwang1986}
@@ -214,6 +223,11 @@ Special Matrices 12 (2024), article 20240006.
 Z. Pang,
 \emph{Proof of Dittert's conjecture for dimensions $n\ge17$},
 arXiv:2606.01531 (2026), preprint.
+
+\bibitem{Kafidov2026}
+B. Kafidov,
+\emph{Dittert's conjecture in dimension 16 via a joint-deficit scaling lemma},
+arXiv:2607.19439 (2026), preprint.
 \end{thebibliography}
 
 \end{document}

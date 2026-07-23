@@ -31,7 +31,7 @@ def square(out,terms,pref=None):
    e=add(a,b);e=add(e,pref) if pref is not None else e
    out[e]+=ca*cb*(1 if i==j else 2)
 def main():
- ap=argparse.ArgumentParser();ap.add_argument('certificate',nargs='?',type=Path,default=Path(__file__).with_name('dittert_n4_twozero_certificate.npz'));args=ap.parse_args()
+ ap=argparse.ArgumentParser();ap.add_argument('certificate',nargs='?',type=Path,default=Path(__file__).with_name('dittert_n4_exact_certificate.npz'));args=ap.parse_args()
  p=args.certificate.resolve();z=np.load(p,allow_pickle=False);e=int(z['denominator_exponent']);assert e==30
  allowed=[tuple(map(int,r)) for r in z['allowed']];G=[tuple(map(int,r)) for r in z['group']];preps=[tuple(map(int,r)) for r in z['pair_reps']];z2=[tuple(map(int,r)) for r in z['z2']]
  L0=np.asarray(z['L0_num']);Lp=np.asarray(z['Lpair_num']);n=14;u=[unit(i,n) for i in range(n)]

@@ -1,0 +1,25 @@
+cff-version: 1.2.0
+message: >-
+  If you use or discuss these materials, please cite this repository and retain
+  its working-proof and peer-review status.
+title: >-
+  Exact working proofs for Dittert's conjecture in dimensions 4, 14, 15, and 16
+type: software
+authors:
+  - given-names: Pedro Paulo
+    family-names: Marques do Nascimento
+repository-code: https://github.com/pedromnasc/dittert-conjecture-proof
+url: https://github.com/pedromnasc/dittert-conjecture-proof
+version: "2026-07-23"
+date-released: 2026-07-23
+abstract: >-
+  Proof notes, exact certificates, verification programs, audit logs, and
+  checksums for reproducible working proofs of Dittert's conjecture in
+  dimensions 4, 14, 15, and 16. The results have not yet undergone formal peer
+  review.
+keywords:
+  - Dittert conjecture
+  - permanent
+  - computer-assisted proof
+  - exact verification
+  - reproducible research

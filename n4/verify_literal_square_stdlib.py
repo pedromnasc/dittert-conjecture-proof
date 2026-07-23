@@ -10,6 +10,8 @@ from __future__ import annotations
 import ast, hashlib, itertools, math, struct, sys, zipfile
 from collections import defaultdict
 from pathlib import Path
+if not __debug__:
+    raise RuntimeError("Run without Python -O; the verifier uses assertions for proof checks.")
 EXPECTED_SHA="d76533bd1c5566ea8d96aa3b58a0b6a8bf3310eb438776ebd99a6bd88d5a11f6"
 EXPECTED_MIN=72694203872
 EXPECTED_MIN_ALPHA=(0,0,0,0,0,0,0,0,1,1,0,0,1,1)
@@ -59,7 +61,7 @@ def sha(path):
   for b in iter(lambda:f.read(1<<20),b''):h.update(b)
  return h.hexdigest()
 def main():
- path=Path(sys.argv[1] if len(sys.argv)>1 else '/mnt/data/dittert_n4_exact_certificate_2026-07-22.npz');digest=sha(path);assert digest==EXPECTED_SHA
+ path=Path(sys.argv[1]) if len(sys.argv)>1 else Path(__file__).with_name('dittert_n4_exact_certificate.npz');digest=sha(path);assert digest==EXPECTED_SHA
  z=load_npz(path);assert z['denominator_exponent']==30 and z['pattern']=='1000/0100/0000/0000'
  allowed=tuple(map(tuple,z['allowed']));G=tuple(map(tuple,z['group']));preps=tuple(map(tuple,z['pair_reps']));z2=tuple(map(tuple,z['z2']));L0=z['L0_num'];Lp=z['Lpair_num'];n=14
  assert allowed==tuple((i,j) for i in range(4) for j in range(4) if (i,j) not in {(0,0),(1,1)})

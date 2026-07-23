@@ -1,5 +1,7 @@
 # Exact working proofs for Dittert's conjecture in dimensions 4, 14, 15, and 16
 
+[![Exact verification](https://github.com/pedromnasc/dittert-conjecture-proof/actions/workflows/verify.yml/badge.svg)](https://github.com/pedromnasc/dittert-conjecture-proof/actions/workflows/verify.yml)
+
 > **Status:** These are exact, reproducible working proofs. They have not yet
 > undergone formal peer review. This repository covers only `n=4` and
 > `n=14,15,16`; it does not by itself settle the intervening dimensions.
@@ -22,6 +24,8 @@ with equality only at the matrix whose entries are all `1/n`.
 This repository contains proof notes, exact certificates, verification code,
 captured audit output, and checksums for the cases listed above.
 
+Author: **Pedro Paulo Marques do Nascimento** (`pedromnasc`).
+
 ## Proofs and audit material
 
 | Dimensions | Proof note | Audit and reproduction notes |
@@ -33,14 +37,15 @@ captured audit output, and checksums for the cases listed above.
 
 Python 3.10 or newer is sufficient for the standard-library verifiers. NumPy
 is used by two additional `n=4` checks, and SymPy is used by the independent
-Sturm audit for `n=14,15,16`.
+Sturm audit for `n=14,15,16`. Exact dependency versions used in automated
+verification are recorded in `requirements-audit.txt`.
 
 ```bash
 git clone https://github.com/pedromnasc/dittert-conjecture-proof.git
 cd dittert-conjecture-proof
 
-# Optional dependencies for every available verifier
-python3 -m pip install numpy sympy
+# Dependencies for every available verifier
+python3 -m pip install -r requirements-audit.txt
 
 # n=4: check file integrity and run three independent certificate readers
 cd n4
@@ -55,6 +60,11 @@ sha256sum -c MANIFEST.sha256
 python3 verify_dittert_n14_n16.py
 python3 audit_dittert_n14_n16_sympy.py
 ```
+
+Run the `n=4` programs without Python's `-O` option. Each assertion-based
+verifier rejects optimized mode explicitly so that proof checks cannot be
+silently disabled. The same commands run automatically on every push and pull
+request through GitHub Actions.
 
 The expected final status is `CERTIFIED` for each `n=4` verifier,
 `ALL CASES CERTIFIED` for the primary `n=14,15,16` verifier, and
@@ -74,13 +84,23 @@ Independent scrutiny of both the mathematical reductions and the software is
 welcome. Please use [GitHub Issues](https://github.com/pedromnasc/dittert-conjecture-proof/issues)
 for errors, questions, or independently reproduced results.
 
+## Citation
+
+Repository citation metadata is provided in [`CITATION.cff`](CITATION.cff).
+Please retain the working-proof and peer-review status when discussing these
+results.
+
 ## Bundle provenance
 
 The repository was assembled on 23 July 2026 from the two original bundles
-below. Their extracted contents are preserved under `n4/` and `n14-n16/`, and
-their internal checksum manifests verify unchanged.
+below. The untouched archives are retained under `original-bundles/`; the
+reviewed working copies under `n4/` and `n14-n16/` have their own current
+checksum manifests.
+
+- [`n=4` original bundle](original-bundles/dittert_n4_audited_bundle_2026-07-23.zip)
+- [`n=14,15,16` original bundle](original-bundles/dittert_n14_n16_exact_proof_bundle_2026-07-23.zip)
 
 ```text
-6b42ad7ebe73fc1686f7442c093ef872c1b25f30dfab1510da27be6000260e01  dittert_n4_audited_bundle_2026-07-23.zip
-3536bf1bcb6ab1b141b1bea74c7ad9ab41b307b3dfa6beb13f883e3a5739149a  dittert_n14_n16_exact_proof_bundle_2026-07-23.zip
+6b42ad7ebe73fc1686f7442c093ef872c1b25f30dfab1510da27be6000260e01  original-bundles/dittert_n4_audited_bundle_2026-07-23.zip
+3536bf1bcb6ab1b141b1bea74c7ad9ab41b307b3dfa6beb13f883e3a5739149a  original-bundles/dittert_n14_n16_exact_proof_bundle_2026-07-23.zip
 ```

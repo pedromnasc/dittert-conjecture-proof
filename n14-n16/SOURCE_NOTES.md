@@ -11,9 +11,9 @@ The proof note relies on the following established ingredients.
    set cannot be one proper rectangular block; Li's doubly-superstochastic
    criterion is recorded as Lemma 2.2.
 3. H. Minc, *Minimum permanents of doubly stochastic matrices with prescribed
-   zero entries*, Linear and Multilinear Algebra 15 (1984), 225-243: averaging
-   repeated-support rows and columns of a permanent minimizer, and the
-   two-exceptional-zero face.
+   zero entries*, Linear and Multilinear Algebra 15 (1984), 225-243,
+   DOI `10.1080/03081088408817592`: Theorem 1's averaging of repeated-support
+   rows and columns of a permanent minimizer, and the two-exceptional-zero face.
 4. K. Pula, S.-Z. Song, and I. M. Wanless, *Minimum permanents on two faces of
    the polytope of doubly stochastic matrices*, Linear Algebra and Its
    Applications 434 (2011), 232-238: notation for the face and an explicit

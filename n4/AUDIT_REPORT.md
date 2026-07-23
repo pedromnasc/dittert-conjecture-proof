@@ -61,7 +61,10 @@ The primary verifier builds Gram matrices and checks the symmetry and hypergraph
 
 ## What this does not prove
 
-This certificate does not settle dimensions `5` through `16`. A June 2026 preprint claims the conjecture for every `n >= 17`; its own status statement leaves `4 <= n <= 16` open. If the present `n=4` certificate is accepted, the unresolved finite range becomes `5 <= n <= 16`.
+This certificate itself settles only dimension `n=4`. Separate working material in
+this repository treats `n=14,15,16`; Pang's June 2026 preprint treats `n >= 17`,
+and Kafidov's July 2026 preprint independently treats `n=16`. This certificate
+makes no claim about dimensions `5` through `13`.
 
 The result has not yet undergone independent peer review or journal publication. The certificate is easy to check exactly, but the literature reduction and the software should still be reviewed by other mathematicians before the result is cited as established.
 
@@ -82,3 +85,4 @@ Each program must terminate with `CERTIFIED`.
 - S.-G. Hwang, “A note on a conjecture on permanents,” *Linear Algebra and its Applications* 76 (1986), 31-44.
 - G.-S. Cheon and I. M. Wanless, “Some results towards the Dittert conjecture on permanents,” *Linear Algebra and its Applications* 436 (2012), 791-801.
 - Z. Pang, “Proof of Dittert's conjecture for dimensions n >= 17,” arXiv:2606.01531 (2026), preprint.
+- B. Kafidov, “Dittert's conjecture in dimension 16 via a joint-deficit scaling lemma,” arXiv:2607.19439 (2026), preprint.
