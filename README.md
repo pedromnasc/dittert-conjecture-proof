@@ -90,6 +90,15 @@ Repository citation metadata is provided in [`CITATION.cff`](CITATION.cff).
 Please retain the working-proof and peer-review status when discussing these
 results.
 
+## License
+
+The papers, LaTeX sources, documentation, certificates, audit material, and
+other non-software research content are licensed under
+[CC BY 4.0](LICENSES/CC-BY-4.0.txt). The verification code and supporting
+software infrastructure are licensed under the [MIT License](LICENSES/MIT.txt).
+See [`LICENSE.md`](LICENSE.md) for the precise scope, including archived bundle
+contents.
+
 ## Bundle provenance
 
 The repository was assembled on 23 July 2026 from the two original bundles
