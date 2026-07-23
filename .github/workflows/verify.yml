@@ -54,7 +54,9 @@ jobs:
 
       - name: Verify n=5 certificate
         working-directory: n5
-        run: python verify_primary.py
+        run: |
+          python verify_primary.py
+          python test_alternate_certificate.py
 
       - name: Ensure n=5 optimized mode is rejected
         working-directory: n5

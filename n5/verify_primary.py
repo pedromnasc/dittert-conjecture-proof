@@ -24,6 +24,7 @@ if not __debug__:
 
 N = 5
 POWER_FIVE = 5**9
+BUNDLED_CERTIFICATE_SHA256 = "373041bda29e1164059a2adbad1aaacd2911784a273629f419972e7ec7b5fdca"
 EXPECTED_MINIMUM = 7_628_882_599_067_611_080
 EXPECTED_MINIMUM_MONOMIAL = (0, 0, 4, 10, 10)
 EXPECTED_MAXIMUM = 7_743_319_887_559_506_820
@@ -66,6 +67,8 @@ def main() -> None:
     parser.add_argument("--json", type=Path)
     args = parser.parse_args()
     path = args.certificate.resolve()
+    certificate_digest = sha256(path)
+    bundled_certificate = certificate_digest == BUNDLED_CERTIFICATE_SHA256
     archive = np.load(path, allow_pickle=False)
     assert set(archive.files) == {
         "denominator_exponent",
@@ -169,9 +172,10 @@ def main() -> None:
     assert len(residual) == math.comb(variables + 4, 5) == 80_730
     assert minimum is not None and minimum > 0
     assert minimum_monomial is not None and maximum is not None
-    assert minimum == EXPECTED_MINIMUM
-    assert minimum_monomial == EXPECTED_MINIMUM_MONOMIAL
-    assert maximum == EXPECTED_MAXIMUM
+    if bundled_certificate:
+        assert minimum == EXPECTED_MINIMUM
+        assert minimum_monomial == EXPECTED_MINIMUM_MONOMIAL
+        assert maximum == EXPECTED_MAXIMUM
 
     # Direct checks that the hypergraph polynomial is row product + column
     # product - permanent, independent of the coefficient construction above.
@@ -197,7 +201,8 @@ def main() -> None:
 
     report = {
         "status": "CERTIFIED",
-        "certificate_sha256": sha256(path),
+        "certificate_sha256": certificate_digest,
+        "bundled_extrema_regression_checked": bundled_certificate,
         "variables": variables,
         "symmetry_group_order": len(group),
         "quintic_hyperedges": len(edges),
@@ -216,6 +221,10 @@ def main() -> None:
     print("certificate SHA-256:", report["certificate_sha256"])
     print("quintic hyperedges in F:", len(edges))
     print("quintic monomials checked:", len(residual))
+    print(
+        "bundled extrema regression:",
+        "checked" if bundled_certificate else "skipped (alternate valid certificate)",
+    )
     print(f"minimum residual: {minimum}/{common_denominator} = {minimum / common_denominator:.17g}")
     print(f"maximum residual: {maximum}/{common_denominator} = {maximum / common_denominator:.17g}")
     print("minimum monomial:", minimum_monomial)

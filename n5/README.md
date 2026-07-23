@@ -31,6 +31,11 @@ python3 build_exact_certificate.py n5_search.npz rebuilt_certificate.npz
 python3 verify_primary.py rebuilt_certificate.npz
 ```
 
+For the bundled certificate, the verifier additionally checks its known
+minimum and maximum residuals as regression values. Rebuilt certificates may
+have different extrema; they are accepted whenever their independently
+reconstructed residual coefficients are all strictly positive.
+
 The proof note has not yet undergone independent peer review. The certificate
 is exact and reproducible, but both the mathematical reduction and verifier
 should receive independent scrutiny before the result is cited as established.
