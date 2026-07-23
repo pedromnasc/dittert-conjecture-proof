@@ -9,7 +9,7 @@
 For a nonnegative `n x n` matrix `A` whose entries sum to `n`, define
 
 $$
-\Phi(A)=\prod_{i=1}^n r_i+\prod_{j=1}^n c_j-\operatorname{per}(A),
+\Phi(A)=\prod_{i=1}^n r_i+\prod_{j=1}^n c_j-\mathrm{per}(A),
 $$
 
 where the $r_i$ and $c_j$ are the row and column sums. Dittert's conjecture
