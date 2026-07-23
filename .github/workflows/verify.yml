@@ -63,6 +63,17 @@ jobs:
         working-directory: n5
         run: if python -O verify_primary.py; then exit 1; fi
 
+      - name: Verify n=9 package integrity
+        working-directory: n9
+        run: sha256sum -c SHA256SUMS
+
+      - name: Verify and test n=9 proof calculations
+        working-directory: n9
+        run: |
+          python -I verify_dittert_n9.py
+          python -I audit_dittert_n9_stdlib.py
+          python -I test_n9_package.py
+
       - name: Verify n=10 package integrity
         working-directory: n10
         run: sha256sum -c SHA256SUMS

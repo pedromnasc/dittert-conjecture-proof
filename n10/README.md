@@ -103,4 +103,4 @@ or van der Waerden. Those dependencies are stated precisely in the proof note
 and `SOURCE_NOTES.md`.
 
 This package proves only dimension `10`. In the repository as a whole, the
-remaining unresolved dimensions are `6,7,8,9`.
+remaining unresolved dimensions are `6,7,8`.
