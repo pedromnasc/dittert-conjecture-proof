@@ -48,6 +48,21 @@ jobs:
           if python -O verify_literal_square_numpy.py; then exit 1; fi
           if python -O verify_literal_square_stdlib.py; then exit 1; fi
 
+      - name: Verify n=5 bundle integrity
+        working-directory: n5
+        run: sha256sum -c SHA256SUMS
+
+      - name: Verify n=5 certificate
+        working-directory: n5
+        run: |
+          python verify_primary.py
+          python test_alternate_certificate.py
+          python test_rejects_corrupt_certificate.py
+
+      - name: Ensure n=5 optimized mode is rejected
+        working-directory: n5
+        run: if python -O verify_primary.py; then exit 1; fi
+
       - name: Verify n=14,15,16 bundle integrity
         working-directory: n14-n16
         run: sha256sum -c MANIFEST.sha256
