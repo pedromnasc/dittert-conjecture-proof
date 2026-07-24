@@ -7,23 +7,31 @@ of the *cut's own* zero block (``nu`` for proper cuts, ``M_z`` for support
 cuts).  But the dominated doubly stochastic ``B`` always inherits the two
 independent zeros of ``A``.  This program measures, for each OPEN n=6 cut,
 
-  * threshold  : the ``per(B)`` lower bound that would just close the cut, and
-  * combined   : the minimum permanent over doubly stochastic 6x6 matrices that
-                 carry the cut's zeros PLUS two independent zeros,
+  * threshold   : the ``per(B)`` lower bound that would just close the cut, and
+  * guaranteed  : the minimum permanent that is *guaranteed* for every
+                  admissible B, i.e. over the WORST placement of the inherited
+                  zeros relative to the cut's own zeros.
 
-so we know exactly which cuts the combined bound can close.
+The worst-placement caveat is essential.  A ``u x v`` block can already contain
+one (or, when ``u>=2`` and ``v>=2``, both) of the two independent zeros, and a
+single zero column can contain at most one of them (they need distinct
+columns).  So only the zeros that CANNOT be absorbed are guaranteed to add new
+constraints; adding two free zeros unconditionally minimizes over a strictly
+smaller face and overstates the bound.
 
 This is a NUMERICAL diagnostic (SLSQP permanent minimization with an analytic
-gradient), not a proof.  A cut that "closes" here still needs an exact
-minimum-permanent reduction (in the style of
-``verify_dittert_n8.two_zero_permanent_polynomial``) before it counts.
+gradient), not a proof.  A cut only "closes" here if the guaranteed bound
+exceeds the threshold, and even then it still needs an exact minimum-permanent
+reduction (in the style of ``verify_dittert_n8.two_zero_permanent_polynomial``)
+before it counts.
 
-Findings (default settings): the combined bound closes support ``z=2`` and the
-three "corner" proper cuts ``(1,1,4),(1,2,3),(2,1,3)``; support ``z=1`` sits on
-the threshold; the seven small-``k`` proper cuts need a ~50% permanent lift the
-combined bound cannot supply and require a different argument (folding the
-``k=1`` cuts into the marginal large-line bound, and/or a stronger deficit
-bound than ``c_{u,v} s^2``).
+Findings (after correct absorption handling): NO open cut closes via the
+combined bound.  The corner proper cut ``(1,1,4)`` is closed separately and
+rigorously by ``per(B) >= 2/125`` alone (see ``diagnose_cut_scoreboard_n6.py``);
+the earlier "closures" of ``(1,2,3),(2,1,3)`` and support ``z=2`` were artifacts
+of adding two guaranteed-outside zeros. The small-``k`` proper cuts need a
+different argument (folding the ``k=1`` cuts into the marginal large-line bound,
+and/or a stronger deficit bound than ``c_{u,v} s^2``).
 
 Run with the discovery venv (numpy + scipy)::
 
@@ -112,30 +120,45 @@ def proper_threshold(u, v, k):
     return hi
 
 
+L_FLOAT = 2 / 125  # the two-zero bound per(B) >= 2/125 (always valid)
+
+
+def worst_one_extra(fixed_zeros, excl_rows, excl_cols, starts=6):
+    """Guaranteed bound when the cut pattern can absorb only ONE inherited zero:
+    place the single guaranteed-outside zero (independent of the pattern:
+    outside excl_rows/excl_cols) in the worst position and take the minimum
+    permanent.  Skips degenerate (near-decomposable) placements."""
+    best = float("inf")
+    for i in range(N):
+        for j in range(N):
+            if i in excl_rows or j in excl_cols:
+                continue
+            p = min_permanent(fixed_zeros | {(i, j)}, starts=starts)
+            if p > 5e-3:                       # ignore decomposable placements
+                best = min(best, p)
+    return best
+
+
 def proper_report():
     print("PROPER CUTS  (sharp bound K(s)=nu(1-s/k)^6 - gamma + c_uv s^2 > 0)")
-    print(f"{'(u,v,k)':>9} {'nu_now':>8} {'need':>8} {'blk':>8} {'+2z':>8} "
-          f"{'swallow':>7} {'closes':>7}")
+    print("guaranteed per(B) accounts for the block absorbing an inherited zero")
+    print(f"{'(u,v,k)':>9} {'nu':>8} {'need':>8} {'guar.':>8} {'absorb':>7} {'closes':>7}")
     for u in range(1, N):
         for v in range(1, N - u):
             k = N - u - v
             g = lambda m: exact.gamma(m) if m > 1 else 1  # noqa: E731
-            nu_now = float(g(N - u) * g(N - v) / g(k))
+            nu = float(g(N - u) * g(N - v) / g(k))
             need = proper_threshold(u, v, k)
             brows, bcols = list(range(N - u, N)), list(range(N - v, N))
             block = frozenset((i, j) for i in brows for j in bcols)
-            blk = min_permanent(block)
-            free_r = [i for i in range(N) if i not in brows]
-            free_c = [j for j in range(N) if j not in bcols]
-            if len(free_r) >= 2 and len(free_c) >= 2:
-                extra = {(free_r[0], free_c[0]), (free_r[1], free_c[1])}
-            else:  # u>=2 and v>=2: two independent zeros fit inside the block
-                extra = set()
-            comb = min_permanent(block | frozenset(extra)) if extra else blk
-            swallow = (u >= 2 and v >= 2)
-            usable = blk if swallow else comb
-            print(f"{f'({u},{v},{k})':>9} {nu_now:>8.5f} {need:>8.5f} {blk:>8.5f} "
-                  f"{comb:>8.5f} {str(swallow):>7} {str(usable >= need):>7}")
+            # a u x v block holds two independent zeros iff u>=2 AND v>=2
+            if u >= 2 and v >= 2:
+                absorb, guar = 2, max(nu, L_FLOAT)      # no zero guaranteed outside
+            else:
+                absorb = 1
+                guar = max(nu, L_FLOAT, worst_one_extra(block, set(brows), set(bcols)))
+            print(f"{f'({u},{v},{k})':>9} {nu:>8.5f} {need:>8.5f} {guar:>8.5f} "
+                  f"{absorb:>7} {str(guar >= need):>7}")
 
 
 # --------------------------------------------------------------------------- #
@@ -175,20 +198,24 @@ def support_threshold(z):
 
 def support_report():
     print("\nSUPPORT CUTS  (current M_z = L = 2/125 for z=1,2)")
-    print(f"{'z':>3} {'need':>8} {'col':>8} {'+2z':>8} {'closes':>7}")
+    print("a single zero column can absorb only ONE inherited zero (they need")
+    print("distinct columns), so only one extra zero is guaranteed outside it.")
+    print(f"{'z':>3} {'need':>8} {'col':>8} {'guar.':>8} {'closes':>7}")
     for z in (1, 2):
         need = support_threshold(z)
-        col = min_permanent(frozenset((i, 0) for i in range(z)))
-        comb = min_permanent(frozenset((i, 0) for i in range(z)) | {(z, 1), (z + 1, 2)})
-        print(f"{z:>3} {need:>8.5f} {col:>8.5f} {comb:>8.5f} {str(comb >= need):>7}")
+        column = frozenset((i, 0) for i in range(z))
+        col = min_permanent(column)
+        guar = max(col, L_FLOAT,
+                   worst_one_extra(column, set(range(z)), {0}))
+        print(f"{z:>3} {need:>8.5f} {col:>8.5f} {guar:>8.5f} {str(guar >= need):>7}")
 
 
 def main():
     print(f"n=6 gamma={GAMMA_F:.7g}  (numerical de-risk, not a proof)\n")
     proper_report()
     support_report()
-    print("\nCombined bound closes: support z=2 and proper (1,1,4),(1,2,3),(2,1,3).")
-    print("Open after it: support z=1 (borderline) and proper k=1,2 cuts.")
+    print("\nWith correct absorption handling, no open cut closes via the")
+    print("combined bound. (1,1,4) is closed separately by per(B)>=2/125 alone.")
 
 
 if __name__ == "__main__":

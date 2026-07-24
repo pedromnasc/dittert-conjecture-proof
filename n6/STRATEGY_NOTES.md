@@ -280,10 +280,21 @@ margin of every cut.  Current state:
 | two-zero permanent gap (symmetric face) | closed | `L-gamma = 23/40500` |
 | marginal cut outside risk `[1/125, 3/50]` | closed | Sturm, 0 roots |
 | subset-deficit constants `c_d` | closed | Bernstein `> 0` |
-| support cut `z=1` (covers marginal risk) | **open** | Bernstein-min `-2.2e-4` |
-| support cut `z=2` | **open** | Bernstein-min `-5.7e-4` |
-| support cuts `z=3,4` | closed | Bernstein `> 0` |
-| proper cuts `(u,v,k)`, all 10 | **open** | sharp-`K`-min `-4.1e-4` .. `-3.9e-3` |
+| support-cut validity band `q>1` | **open** | valid only on `[31/2000, 3/50]`; `[1/125, 31/2000]` UNCOVERED |
+| support cut `z=1` on `[a_q, 3/50]` | **open** | Bernstein-min `-1.8e-4` |
+| support cut `z=2` on `[a_q, 3/50]` | **open** | Bernstein-min `-5.3e-4` |
+| support cuts `z=3,4` on `[a_q, 3/50]` | closed | Bernstein `> 0` |
+| proper cut `(1,1,4)` | **closed** | via `per(B)>=2/125`; sharp-`K`-min `+1.17e-5` |
+| proper cuts `(u,v,k)`, other 9 | **open** | sharp-`K`-min `-3.7e-4` .. `-3.8e-3` |
+
+The support-cut caveat is a correctness fix flagged in review: the
+large-column derivation requires `q(a) > 1` (that is what caps every
+non-distinguished row sum below one and makes `U_z` a valid product upper
+bound).  For `n=6`, `q(1/125)-1 = -0.00745 < 0`; `q` first exceeds `1` only at
+`a_q ~ 0.01529`.  So the support argument is valid only on `[a_q, 3/50]`, and
+the band `[1/125, a_q]` of the marginal risk interval is **uncovered by any
+current argument** — a real gap in the marginal case beyond the `z=1,2`
+failures.  (`z=1,2` fail on the valid domain too; `z=3,4` pass there.)
 
 Two `n=8` bounds were tested on the proper cuts and both fail at `n=6`:
 
@@ -308,52 +319,41 @@ Even the theoretically optimal near-zero subset constants
 Both open families under-use one fact: the dominated doubly stochastic `B`
 always inherits the two independent zeros of `A`, yet the open permanent bounds
 `M_z` (support) and `nu` (proper) are computed from the cut's own zero block
-alone.  A **combined minimum-permanent bound** — two independent zeros *plus*
-the cut zero block — raises every open margin.
-`combined_permanent_derisk_n6.py` measures, per open cut, the permanent lower
-bound needed to close it against the minimum permanent the combined pattern
-actually supplies (numeric SLSQP permanent minimization with an analytic
-gradient).  Result:
+alone.  A **combined minimum-permanent bound** — cut zero block *plus* the
+inherited zeros — could raise the open margins.  But it must respect
+**absorption** (correctness fix flagged in review): a `u x v` block can already
+contain one of the inherited zeros (both, when `u>=2` and `v>=2`), and a single
+zero column can contain at most one (the two need distinct columns).  So only
+the zeros that cannot be absorbed are *guaranteed* to add new constraints;
+adding two free zeros unconditionally minimizes over a strictly smaller face and
+overstates the bound.  `combined_permanent_derisk_n6.py` now computes the
+guaranteed bound over the worst placement.  Result:
 
-| Open cut | `per(B)` needed | combined available | verdict |
+| Open cut | `per(B)` needed | guaranteed | verdict |
 | --- | ---: | ---: | --- |
-| support `z=2` | `0.01660` | `~0.0168` | **closes** |
-| support `z=1` | `0.01652` | `~0.0164` | borderline (on the threshold) |
-| proper `(1,1,4)` | `0.01597` | `~0.0163` | **closes** |
-| proper `(1,2,3)`, `(2,1,3)` | `0.01662` | `~0.0167` | **closes** |
-| proper `(1,3,2)`, `(3,1,2)` | `0.01836` | `~0.0175` | no |
-| proper `(2,2,2)` | `0.01872` | `0.0176` (`nu` only¹) | no |
-| proper `(1,4,1)`, `(4,1,1)` | `0.02901` | `~0.0192` | no |
-| proper `(2,3,1)`, `(3,2,1)` | `0.03337` | `0.0209` (`nu` only¹) | no |
+| proper `(1,2,3)`, `(2,1,3)` (absorb 1) | `0.01662` | `0.01645` | no |
+| proper `(1,3,2)`, `(3,1,2)` (absorb 1) | `0.01836` | `0.01728` | no |
+| proper `(1,4,1)`, `(4,1,1)` (absorb 1) | `0.02901` | `0.01922` | no |
+| proper `(2,2,2)` (absorb 2) | `0.01872` | `0.01758` (`nu`) | no |
+| proper `(2,3,1)`, `(3,2,1)` (absorb 2) | `0.03337` | `0.02083` (`nu`) | no |
+| support `z=1` (absorb 1) | `0.01652` | `0.01604` | no |
+| support `z=2` (absorb 1) | `0.01660` | `0.01645` | no |
 
-¹ For `u>=2` and `v>=2` a `u x v` block can contain both independent zeros, so
-the inherited zeros give no *guaranteed* lift; the usable bound stays at the
-barycenter `nu`.
+**After correct absorption handling, no open cut closes via the combined
+bound.**  The earlier "closures" of `(1,2,3),(2,1,3)` and support `z=2` were
+artifacts of adding two guaranteed-outside zeros; with only the one
+non-absorbed zero the guaranteed bound drops below threshold.
 
-So the combined bound closes support `z=2` and the three "corner" proper cuts
-`(1,1,4),(1,2,3),(2,1,3)`, and leaves support `z=1` on the knife-edge.  The
-seven small-`k` proper cuts (`k=1,2`) need a `~50%` permanent lift the bound
-cannot supply: for `k=1` the `(1-s)^6` permanent decay is too steep and the
-`c_{u,v} s^2` deficit too weak.
-
-**Rigorously closed so far.**  One of these is now closed with no new reduction:
-`B` lies on the two-zero face, so `per(B) >= max(nu, 2/125)`, and for `(1,1,4)`
-the block barycenter `nu = 0.01573` is *below* `2/125 = 0.016`.  With
-`per(B) >= 2/125` the sharp bound `K(s)` has exact Bernstein-min `+1.17e-5 > 0`
-on `[0, s_max]` (checked in `diagnose_cut_scoreboard_n6.py`, which now applies
-`max(nu, 2/125)`).  The n=8 proof never needed this `max` because there
-`nu > L` on every sharp cut.  This is a genuine, verifier-grade closure and
-drops the open proper cuts from ten to nine.
-
-A 3-independent-zero minimum-permanent reduction (the natural generalization of
-`two_zero_permanent_polynomial`) turns out to be **unnecessary**: `(1,1,4)` is
-the only open cut whose block is a single cell, and it is already closed by the
-two-zero bound.  Every other open cut has `nu > 2/125` and a combined pattern
-that is neither 3-independent-zeros nor a staircase (a `1x2` block, a `2x2`
-block, or `2`-in-a-column), so each would need its own bespoke Minc-type
-reduction, and the margins for the ones that even close numerically
-(`(1,2,3),(2,1,3)`, support `z=2`) are `~1e-4` — the same size as the numeric
-noise, so their closure is not yet established.
+**The one rigorous closure** stands independently: `B` lies on the two-zero
+face, so `per(B) >= max(nu, 2/125)`, and for `(1,1,4)` the block barycenter
+`nu = 0.01573` is *below* `2/125 = 0.016`.  With `per(B) >= 2/125` the sharp
+bound `K(s)` has exact Bernstein-min `+1.17e-5 > 0` on `[0, s_max]` (checked in
+`diagnose_cut_scoreboard_n6.py`, which now applies `max(nu, 2/125)`).  This uses
+only the two inherited zeros, so absorption does not affect it.  It drops the
+open proper cuts from ten to nine.  A 3-independent-zero reduction is
+**unnecessary** — `(1,1,4)` is the only single-cell-block cut and it is already
+closed by the two-zero bound; every other open cut has `nu > 2/125` and gains
+nothing from it.
 
 ### Remaining frontier for the hard cuts
 

@@ -119,12 +119,46 @@ def marginal_block() -> bool:
 
 # --------------------------------------------------------------------------- #
 # 3. support cuts (the large-column bound that covers the marginal risk band)
+#
+# The large-column derivation is only valid where q(a) > 1: that is what caps
+# every non-distinguished row sum below one, excludes a full-support column,
+# and makes U_z a valid product upper bound (n=8 proof, eq. row-cap).  For n=6,
+# q(1/125)-1 < 0, so q > 1 holds only on a strict sub-interval [a_q, 3/50];
+# the remaining band [1/125, a_q] is NOT covered by this argument.
 # --------------------------------------------------------------------------- #
+def q_validity_left() -> Fraction:
+    """Rational a_q >= the root of q-1 in the risk band, with q>1 to its right."""
+    _, _, _, e_power, q_numerator = exact.support_base_polynomials(N)
+    q_minus_one = exact.poly_sub(q_numerator, e_power)
+    require = exact.sturm_root_count(q_minus_one, RISK_LEFT, RISK_RIGHT)
+    if require != 1:
+        raise AssertionError(f"expected one q=1 crossing, found {require}")
+    lo, hi = RISK_LEFT, RISK_RIGHT
+    for _ in range(80):
+        mid = (lo + hi) / 2
+        if exact.poly_eval(q_minus_one, mid) > 0:
+            hi = mid
+        else:
+            lo = mid
+    # clean rational upper bound on the root: smallest k/2000 that is >= hi
+    scale = 2000
+    a_q = Fraction(-(-(hi * scale).numerator // (hi * scale).denominator), scale)
+    # a_q must have q>1 and no further crossing up to RISK_RIGHT
+    if not (a_q >= hi and exact.poly_eval(q_minus_one, a_q) > 0
+            and exact.sturm_root_count(q_minus_one, a_q, RISK_RIGHT) == 0):
+        raise AssertionError("failed to certify the q>1 sub-interval")
+    return a_q
+
+
 def support_block() -> bool:
     e_value, h_numerator, t_value, e_power, q_numerator = (
         exact.support_base_polynomials(N))
     one_minus_a = exact.linear(1, -1)
-    all_ok = True
+    a_q = q_validity_left()
+    line("support domain q>1", "OPEN",
+         f"valid only on [{a_q}~{float(a_q):.4f}, {RISK_RIGHT}]; "
+         f"band [{RISK_LEFT}, {a_q}] is UNCOVERED (q<1 there)")
+    all_ok = False  # the uncovered band alone leaves the marginal cut open
     for zero_count in range(1, N - 1):
         support_size = N - zero_count
         staircase = (gamma_ext(N - zero_count) * gamma_ext(N - 1)
@@ -149,14 +183,16 @@ def support_block() -> bool:
                            exact.poly_pow(e_value, N + (N - 1) * (support_size - 1))),
             exact.poly_pow(weighted_q, zero_count))
         gap = exact.poly_sub(left_side, right_side)
-        # split the risk interval in two for a tighter Bernstein enclosure
-        mid = (RISK_LEFT + RISK_RIGHT) / 2
-        coeffs = (exact.power_to_bernstein(gap, RISK_LEFT, mid)
-                  + exact.power_to_bernstein(gap, mid, RISK_RIGHT))
+        # Bernstein enclosure over the VALID domain [a_q, RISK_RIGHT] only.
+        splits = 8
+        coeffs = []
+        for i in range(splits):
+            coeffs += exact.power_to_bernstein(
+                gap, a_q + (RISK_RIGHT - a_q) * Fraction(i, splits),
+                a_q + (RISK_RIGHT - a_q) * Fraction(i + 1, splits))
         bmin = min(coeffs)
         ok = bmin > 0
-        all_ok &= ok
-        line(f"support cut z={zero_count} (M={case_bound})",
+        line(f"support cut z={zero_count} (M={case_bound}) on [a_q,{RISK_RIGHT}]",
              "PASS" if ok else "OPEN",
              f"Bernstein-min={float(bmin):+.4g}")
     return all_ok
