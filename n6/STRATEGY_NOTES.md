@@ -1,0 +1,301 @@
+# `n=6` proof search: exact reduction and current status
+
+## Status
+
+There is **not yet an `n=6` proof certificate** in this directory.  The files
+here record a reproducible search, including several certificate cones that
+were tested and found numerically insufficient.  Floating-point solver output
+is never treated as a proof.
+
+The exact verifier scaffold, `verify_primary.py`, accepts only a rounded
+integer certificate whose reconstructed residual coefficients are all
+strictly positive.  No search result produced so far passes it.
+
+## Exact face reduction
+
+The same published structural reduction used in the `n=5` proof reduces a
+boundary maximizer to the face
+
+```text
+x[0,0] = x[1,1] = 0.
+```
+
+After writing `X=A/6`, let the 34 remaining entries be `x_v`, and put
+`S=sum_v x_v`.  On this face,
+
+```text
+F(x) = product(row sums) + product(column sums) - permanent(X)
+```
+
+is the square-free hypergraph polynomial whose edges meet every row or every
+column.  It has 64,296 edges.  Since
+
+```text
+2 - 6!/6^6 = 643/324,
+```
+
+the required strict face inequality is
+
+```text
+G6(x) = (643/15116544) S^6 - F(x) > 0       (x >= 0, S=1).
+```
+
+The automorphism group of the two-zero face has order 2,304.  Its action has
+the following exact orbit counts:
+
+| Objects | Total | Orbits |
+| --- | ---: | ---: |
+| degree-2 monomials | 595 | 16 |
+| degree-3 monomials | 7,140 | 65 |
+| degree-4 monomials | 66,045 | 302 |
+| degree-6 monomials | 3,262,623 | 5,605 |
+| degree-7 monomials | 18,643,560 | 23,287 |
+
+All coefficient maps in the search programs are constructed from these exact
+integer orbit tables.
+
+## Certificate families tested
+
+### Degree-four multipliers times linear squares
+
+The first full cone was
+
+```text
+sum_mu sum_gamma x^(gamma mu) (ell(gamma x)^T Q_mu ell(gamma x)),
+Q_mu >= 0,
+```
+
+with one block for each of the 302 degree-four multiplier orbits.  The raw
+model has 179,690 Gram coordinates.  Stabilizer averaging reduces this to
+50,818 coordinates without changing the represented polynomial.
+
+A coarse SCS run appeared to have positive margin, but exact PSD projection
+destroyed it.  Tighter direct and indirect runs both converged near margin
+`-9.34e-5`.  Thus the coarse positive value was a feasibility artifact, not a
+certificate.  `search_degree4_invariant_sos_n6.py` is the preferred search
+implementation for this cone.
+
+### Adding degree-two multipliers times quadratic squares
+
+There are 16 such 595-by-595 Gram blocks.  Full matrices are too large for a
+naive SDP, so two reductions were tested:
+
+- spectral column generation in
+  `search_degree2_quadratic_column_n6.py`;
+- obstruction-generated quadratic subspaces in
+  `search_degree2_subspace_sos_n6.py`.
+
+The subspace model had 27,178 coefficient coordinates, 13 PSD blocks of sizes
+at most 107, and 864,057 nonzero coefficient-map entries.  Its reduced map was
+cross-checked against the unreduced map on random symmetric matrices.  It
+again converged to a negative margin close to `-9.4e-5`; this addition did not
+remove the degree-six obstruction.
+
+### Cubic sums of squares
+
+Three increasingly strong cubic experiments were tried:
+
+- transversal binomials `(x^A-x^B)^2`;
+- negative-hyperedge obstruction eigenvectors;
+- dual-priced eigenvectors of the full 7,140-by-7,140 cubic slack matrix.
+
+The first two did not materially change the margin.  Full cubic pricing did
+improve it, but successive master margins remained negative (approximately
+`-1.20e-4`, `-1.15e-4`, `-1.11e-4`, `-1.10e-4`, `-1.09e-4`).  The relevant
+programs are `search_cubic_binomial_n6.py`,
+`search_cubic_obstruction_rays_n6.py`, and `search_cubic_column_n6.py`.
+
+These are numerical search results, not impossibility theorems for the exact
+cones.
+
+## Persistent degree-seven continuation
+
+The degree-six searches share a pure-vertex cost obstruction: after PSD
+projection, almost every residual orbit is negative and even the coefficients
+of `x_v^6` are about `-9e-5`.  Multiplying that particular residual by a power
+of `S` cannot repair its pure coefficients.
+
+The next hierarchy level is therefore to search for a new identity for
+`S*G6` rather than merely lift the old residual.  A natural cone is
+
+```text
+sum_mu sum_gamma x^(gamma mu)
+    m2(gamma x)^T Q_mu m2(gamma x),
+Q_mu >= 0,
+```
+
+where `mu` runs over the 65 degree-three multiplier orbits.  The lifted target
+has 23,287 coefficient orbits.
+
+`search_degree7_column_n6.py` now keeps one HiGHS master model alive through
+SciPy's bundled HiGHS interface.  It scales columns, reuses simplex bases or
+uses IPM with crossover, prunes only old zero-weight rays, rejects duplicate
+eigendirections, reconstructs full columns before accepting a result, and
+writes restartable checkpoints.
+
+The persistent search was run through master iteration 8.  The latest solved
+model had 1,580 active quadratic rays and margin
+
+```text
+-0.000654998425835
+```
+
+before adding the next 220 priced rays.  The checkpoint contains 1,691 rays.
+This improves on the initial margin `-0.000660763278985`, but is far too small
+to indicate a path to zero.  Spectral violations also remain substantial.
+Thus this degree-seven cone has not been proved insufficient, but merely
+extending the same bundle is not the best next use of computation.
+
+## Li-scaling diagnostic
+
+The proof architecture used for dimensions 8--10 was specialized to `n=6`
+in `explore_li_scaling_n6.py`.  One part is especially promising and exact.
+On the doubly stochastic face with two independent zeroes, the permanent is
+the univariate polynomial
+
+```text
+18 x^2 - 336 x^3 + 2520 x^4 - 8832 x^5 + 12288 x^6,
+1/8 <= x <= 1/4.
+```
+
+An exact Sturm calculation proves that this polynomial is greater than
+`2/125`, while
+
+```text
+2/125 - gamma_6 = 23/40500 > 0.
+```
+
+The later dimension-8 inequalities do not survive unchanged:
+
+- the scalar marginal inequality has a risk interval roughly from `0.006`
+  to `0.056`;
+- the large-column support bounds fail for distinguished columns with one or
+  two zero entries;
+- every crude proper-cut `eta` comparison is negative.
+
+This rules out a direct substitution of `n=6` into the dimension-8 proof,
+but the exact two-zero permanent gap remains useful input for a stronger
+maximality argument.
+
+## Numerical geometry of the hard face
+
+`optimize_face_n6.py` evaluates the permanent and its gradient directly and
+uses a scaled constrained objective.  Twenty random starts, plus symmetric
+starts, all converged to the same relative-interior stationary point.  It is
+doubly stochastic after scaling by 6 and has the three cell-orbit values
+
+```text
+special cross entries       0.038267539249...
+top/lower cross entries     0.032099781855...
+lower 4-by-4 entries        0.025616775739...
+```
+
+At this point
+
+```text
+F = 0.0000425238864527176...
+target = 0.0000425361775813308...
+gap = 0.0000000122911286131...
+```
+
+The Hessian restricted to the simplex tangent space is numerically negative
+definite; its largest eigenvalue is about `-1.42495e-5`.  Imposing one
+additional zero of each of the three variable-orbit types again led
+numerically to doubly stochastic stationary points, with target gaps between
+`1.78e-8` and `2.69e-8`.
+
+These calculations strongly suggest that the global face maximizer is the
+doubly stochastic permanent minimizer, but they do not prove it.
+`test_symmetrization_n6.py` also records an important negative result: full
+group averaging does not always increase `F`, even in a fairly high-value
+region.  Any valid reduction to the symmetric point must therefore use the
+first- or second-order conditions of a maximizer, not averaging alone.
+
+## Best next proof search
+
+The most focused next route is a higher KKT/Jacobian certificate for the
+two-zero face.  At a constrained maximizer of the homogeneous degree-six form,
+
+```text
+x_v * (S * partial_v F - 6 F) = 0
+```
+
+for every allowed coordinate.  Also
+
+```text
+6 F - S * partial_v F >= 0
+```
+
+at a maximizer, with equality on its positive support.
+`search_kkt_seed_n6.py` tested the two independent constant symmetry sums of
+the complementarity equations at degree seven; they changed the projected
+seed margin only from `-0.0006607633` to `-0.0006606883`.
+`search_kkt_inequality_n6.py` tested the three degree-six orbit sums of the
+derivative inequalities; the optimizer assigned all three zero weight.  The
+coefficient map in the latter program was independently checked against a
+direct gradient evaluation to `2.8e-19`.
+
+Thus useful KKT information will require polynomial multipliers, equivalently
+the next Jacobian relaxation, rather than constant orbit sums.  This still
+targets only stationary supports and avoids forcing a very weak
+coefficient-positive certificate over the entire orthant.  The exact
+univariate permanent gap above can then certify the symmetric stationary
+case.  A second computational option is to combine the full cubic-SOS and
+degree-two/quadratic-SOS cones in one persistent master; those cones have so
+far only been priced separately.
+
+If either route produces a positive numerical margin, the exact-certificate
+steps are already scaffolded:
+
+1. round explicit factors on a dyadic grid;
+2. reconstruct every coefficient with Python integers;
+3. require a strictly positive exact residual;
+4. add an independent verifier and only then write the proof note.
+
+## Reproduction environment
+
+Create a disposable environment and install the pinned discovery packages:
+
+```bash
+python3 -m venv /tmp/dittert-n6-venv
+/tmp/dittert-n6-venv/bin/pip install -r n6/requirements-search.txt
+```
+
+For example, the stabilizer-reduced degree-six search is
+
+```bash
+/tmp/dittert-n6-venv/bin/python n6/search_degree4_invariant_sos_n6.py \
+  --eps 1e-6 --max-iters 3000 --output /tmp/n6_degree4.npz
+```
+
+and the degree-seven continuation is
+
+```bash
+/tmp/dittert-n6-venv/bin/python n6/search_degree7_column_n6.py \
+  /tmp/n6_degree4.npz --solver ipm \
+  --checkpoint /tmp/n6_degree7.checkpoint.npz \
+  --output /tmp/n6_degree7.npz
+```
+
+Restart it with
+
+```bash
+/tmp/dittert-n6-venv/bin/python n6/search_degree7_column_n6.py \
+  /tmp/n6_degree4.npz --solver ipm \
+  --resume /tmp/n6_degree7.checkpoint.npz \
+  --checkpoint /tmp/n6_degree7.checkpoint.npz \
+  --output /tmp/n6_degree7.npz
+```
+
+Run the structural diagnostics with
+
+```bash
+/tmp/dittert-n6-venv/bin/python n6/explore_li_scaling_n6.py
+/tmp/dittert-n6-venv/bin/python n6/optimize_face_n6.py --random-starts 20
+/tmp/dittert-n6-venv/bin/python n6/optimize_subfaces_n6.py --starts 20
+/tmp/dittert-n6-venv/bin/python n6/search_kkt_seed_n6.py /tmp/n6_degree4.npz
+/tmp/dittert-n6-venv/bin/python n6/search_kkt_inequality_n6.py /tmp/n6_degree4.npz
+```
+
+Neither command is a proof check.  A proof exists only when an exact archive
+passes `verify_primary.py` and prints `CERTIFIED`.
