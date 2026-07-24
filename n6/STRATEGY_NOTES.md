@@ -108,6 +108,34 @@ programs are `search_cubic_binomial_n6.py`,
 These are numerical search results, not impossibility theorems for the exact
 cones.
 
+The previous attempt suggested a more structured way to expose nontrivial
+representation components: for one anchor in each of the three cell orbits,
+form cubic orbit sums under its stabilizer and average their Gram squares over
+the full group.  The exact feature counts are
+
+| anchor cell orbit | cubic features | symmetric Gram coordinates |
+| --- | ---: | ---: |
+| exceptional off-diagonal | 117 | 6,903 |
+| exceptional-to-ordinary | 440 | 97,020 |
+| ordinary-to-ordinary | 272 | 37,128 |
+
+`search_anchored_cubic_n6.py` implements these three blocks by PSD column
+generation.  It compresses each full cubic dual slack matrix to dense blocks
+of sizes 117, 440, and 272, then adds the most-negative rank-one rays.  This
+avoids materializing the full 141,051-coordinate coefficient map and writes a
+restartable checkpoint after every iteration.
+
+This anchored cone is not larger than the full group-averaged cubic SOS cone
+priced by `search_cubic_column_n6.py`: every anchored square is already a
+group average of an ordinary cubic square.  Its advantage is computational,
+because it adds directions from three targeted stabilizer-fixed subspaces in
+parallel.  A seven-master diagnostic run improved the margin from
+`-0.000120205628876` to `-0.000109996046095`; its checkpoint contains 48
+priced rays.  The reduced slacks were still indefinite, so the run had not
+exhausted the anchored cones, but the rate of improvement was already
+slowing.  This is useful search progress, not evidence of a positive
+certificate.
+
 ## Persistent degree-seven continuation
 
 The degree-six searches share a pure-vertex cost obstruction: after PSD
@@ -176,6 +204,57 @@ The later dimension-8 inequalities do not survive unchanged:
 This rules out a direct substitution of `n=6` into the dimension-8 proof,
 but the exact two-zero permanent gap remains useful input for a stronger
 maximality argument.
+
+### First-variation refinement of Li scaling
+
+There is a valid strengthening that keeps the first variation of the
+permanent.  Write
+
+```text
+A = lambda B + E,       E >= 0.
+```
+
+For a tight Li cut of denominator `k`, tightness forces `E` to vanish on the
+tight block.  Hence `p(t)=per(lambda B+tE)` has degree at most `n-k`, and its
+nonnegative coefficients give
+
+```text
+P - lambda^n per(B) >= p'(1)/(n-k).
+```
+
+Support stationarity and `sum(E)=n(1-lambda)` then give
+
+```text
+(n lambda-k) P >= (n-k) lambda^n per(B) - lambda(E_r+E_c),
+
+E_r = R (sum_i 1/r_i-n),       E_c = C (sum_j 1/c_j-n).
+```
+
+Since `lambda` is no larger than any line sum,
+
+```text
+lambda E_r <= -2R log R <= 2(1-R),
+lambda E_c <= -2C log C <= 2(1-C).
+```
+
+Together with the shared deficit this proves
+
+```text
+(n lambda-k) P >= (n-k) lambda^n per(B) - 2 delta.
+```
+
+For the `n=6` marginal cut (`lambda=1-a`, `k=1`), combining this with
+`delta>=D(a)` and `per(B)>=2/125` yields a new exact safe interval
+`0<=a<=1/125`.  A Sturm check in `explore_li_scaling_n6.py` proves positivity
+there; the first numerical root is approximately `0.008138350996`.  Used
+together with the basic Li estimate, this narrows the current rational risk
+enclosure from `[1/200,3/50]` to `[1/125,3/50]`.  It does not improve the
+right endpoint, so it is useful but not by itself decisive.
+
+The first-variation inequality contains more information than the basic Li
+estimate, but after replacing its error by `2 delta` neither resulting scalar
+upper bound dominates the other for every `lambda`.  Both bounds must be
+retained.
 
 ## Numerical geometry of the hard face
 
@@ -285,6 +364,19 @@ Restart it with
   --resume /tmp/n6_degree7.checkpoint.npz \
   --checkpoint /tmp/n6_degree7.checkpoint.npz \
   --output /tmp/n6_degree7.npz
+```
+
+Run or resume the anchored-cubic search from a degree-four archive with
+
+```bash
+/tmp/dittert-n6-venv/bin/python n6/search_anchored_cubic_n6.py \
+  /tmp/n6_degree4.npz --iterations 10 --rays-per-block 3 \
+  --output /tmp/n6_anchored_cubic.npz
+
+/tmp/dittert-n6-venv/bin/python n6/search_anchored_cubic_n6.py \
+  /tmp/n6_degree4.npz --resume /tmp/n6_anchored_cubic.npz \
+  --iterations 10 --rays-per-block 3 \
+  --output /tmp/n6_anchored_cubic.npz
 ```
 
 Run the structural diagnostics with

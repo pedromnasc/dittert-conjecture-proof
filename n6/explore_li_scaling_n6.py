@@ -24,6 +24,7 @@ GAMMA = exact.gamma(N)
 LOWER_BOUND = Fraction(2, 125)
 RISK_LEFT = Fraction(1, 200)
 RISK_RIGHT = Fraction(3, 50)
+STRENGTHENED_RISK_LEFT = Fraction(1, 125)
 FEASIBLE_RIGHT = Fraction(11, 100)
 
 
@@ -33,6 +34,42 @@ def as_float(poly: exact.Poly, value: float) -> float:
 
 def bernstein_minimum(poly: exact.Poly, left: Fraction, right: Fraction) -> Fraction:
     return min(exact.power_to_bernstein(poly, left, right))
+
+
+def strengthened_marginal_numerator(
+    deficit_minus_gamma: exact.Poly, common: exact.Poly
+) -> exact.Poly:
+    """Clear denominators in the first-variation Li contradiction.
+
+    For a marginal tight cut, ``lambda = 1-a`` and ``k = 1``.  The
+    strengthened inequality implies
+
+        (n*lambda-3) delta
+            <= (n*lambda-1) gamma_n - (n-1) lambda^n L_n.
+
+    Combining this with ``delta >= D(a)`` gives the strict contradiction
+
+        (n*lambda-3) D(a) - (n*lambda-1) gamma_n
+            + (n-1) lambda^n L_n > 0.
+
+    ``deficit_minus_gamma/common`` is ``D(a)-gamma_n``.  The returned
+    polynomial is therefore the numerator after multiplication by the
+    positive common denominator.
+    """
+    one_minus_a = exact.linear(1, -1)
+    q_minus_two = exact.linear(N - 3, -N)
+    return exact.trim(
+        exact.poly_add(
+            exact.poly_mul(q_minus_two, deficit_minus_gamma),
+            exact.poly_add(
+                exact.poly_scale(common, -2 * GAMMA),
+                exact.poly_scale(
+                    exact.poly_mul(exact.poly_pow(one_minus_a, N), common),
+                    (N - 1) * LOWER_BOUND,
+                ),
+            ),
+        )
+    )
 
 
 def two_zero_diagnostic() -> None:
@@ -61,6 +98,7 @@ def marginal_diagnostic() -> None:
     contradiction, deficit_minus_gamma, common = exact.marginal_numerator(
         N, LOWER_BOUND
     )
+    strengthened = strengthened_marginal_numerator(deficit_minus_gamma, common)
     safe_intervals = (
         (Fraction(0), RISK_LEFT),
         (RISK_RIGHT, FEASIBLE_RIGHT),
@@ -80,6 +118,26 @@ def marginal_diagnostic() -> None:
             exact.poly_eval(deficit_minus_gamma, FEASIBLE_RIGHT)
             / exact.poly_eval(common, FEASIBLE_RIGHT)
         ),
+    )
+    strengthened_interval = (Fraction(0), STRENGTHENED_RISK_LEFT)
+    strengthened_roots = exact.sturm_root_count(strengthened, *strengthened_interval)
+    strengthened_endpoints = [
+        exact.poly_eval(strengthened, point) for point in strengthened_interval
+    ]
+    if strengthened_roots or min(strengthened_endpoints) <= 0:
+        raise AssertionError("strengthened Li safe interval was not certified")
+    first_strengthened_root = optimize.brentq(
+        lambda value: as_float(strengthened, value),
+        float(STRENGTHENED_RISK_LEFT),
+        Fraction(1, 100),
+        xtol=1e-15,
+    )
+    print(
+        "strengthened marginal:",
+        f"safe=[0,{STRENGTHENED_RISK_LEFT}]",
+        f"roots={strengthened_roots}",
+        f"first-numeric-root={first_strengthened_root:.15g}",
+        f"combined-risk=[{STRENGTHENED_RISK_LEFT},{RISK_RIGHT}]",
     )
 
     e_value, h_numerator, t_value, e_power, q_numerator = (
