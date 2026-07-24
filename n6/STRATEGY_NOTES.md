@@ -11,6 +11,17 @@ The exact verifier scaffold, `verify_primary.py`, accepts only a rounded
 integer certificate whose reconstructed residual coefficients are all
 strictly positive.  No search result produced so far passes it.
 
+Two working fronts exist.  (1) The global 34-variable SOS/coefficient-domination
+line (`verify_primary.py` and the `search_*` cone programs) is **structurally
+capped**: the face minimizer is an interior, irrational, near-degenerate point
+`x*` with `G6(x*) ~ 1.2e-8`, and a strictly-positive residual forces the SOS
+part to reproduce `G6` at `x*` to within `~1e-8`, i.e. the optimal Gram sits on
+the boundary of the PSD cone and cannot be rounded to a strictly-positive
+integer certificate.  Adding rays or degree does not change this.  (2) The
+**boundary-cut recursion** (the exact Li-scaling architecture that proves
+`n=8`) is the more promising line; `diagnose_cut_scoreboard_n6.py` maps exactly
+which cuts remain open (see the scoreboard section below).
+
 ## Exact face reduction
 
 The same published structural reduction used in the `n=5` proof reduces a
@@ -255,6 +266,115 @@ The first-variation inequality contains more information than the basic Li
 estimate, but after replacing its error by `2 delta` neither resulting scalar
 upper bound dominates the other for every `lambda`.  Both bounds must be
 retained.
+
+## Exact boundary-cut scoreboard (`diagnose_cut_scoreboard_n6.py`)
+
+The audited `n=8` proof excludes every boundary maximizer by classifying the
+maximal Li scaling into whole, marginal, and proper tight cuts and killing each
+with an exact univariate inequality.  `diagnose_cut_scoreboard_n6.py` runs that
+same classification for `n=6` in exact rational arithmetic and reports the
+margin of every cut.  Current state:
+
+| Cut | Status | Exact margin |
+| --- | --- | --- |
+| two-zero permanent gap (symmetric face) | closed | `L-gamma = 23/40500` |
+| marginal cut outside risk `[1/125, 3/50]` | closed | Sturm, 0 roots |
+| subset-deficit constants `c_d` | closed | Bernstein `> 0` |
+| support-cut validity band `q>1` | **open** | valid only on `[31/2000, 3/50]`; `[1/125, 31/2000]` UNCOVERED |
+| support cut `z=1` on `[a_q, 3/50]` | **open** | Bernstein-min `-1.8e-4` |
+| support cut `z=2` on `[a_q, 3/50]` | **open** | Bernstein-min `-5.3e-4` |
+| support cuts `z=3,4` on `[a_q, 3/50]` | closed | Bernstein `> 0` |
+| proper cut `(1,1,4)` | **closed** | via `per(B)>=2/125`; sharp-`K`-min `+1.17e-5` |
+| proper cuts `(u,v,k)`, other 9 | **open** | sharp-`K`-min `-3.7e-4` .. `-3.8e-3` |
+
+The support-cut caveat is a correctness fix flagged in review: the
+large-column derivation requires `q(a) > 1` (that is what caps every
+non-distinguished row sum below one and makes `U_z` a valid product upper
+bound).  For `n=6`, `q(1/125)-1 = -0.00745 < 0`; `q` first exceeds `1` only at
+`a_q ~ 0.01529`.  So the support argument is valid only on `[a_q, 3/50]`, and
+the band `[1/125, a_q]` of the marginal risk interval is **uncovered by any
+current argument** — a real gap in the marginal case beyond the `z=1,2`
+failures.  (`z=1,2` fail on the valid domain too; `z=3,4` pass there.)
+
+Two `n=8` bounds were tested on the proper cuts and both fail at `n=6`:
+
+- the crude `eta = nu - gamma - n^3 nu^2 / (4 k^2 (1-gamma))` (which `verify_n8`
+  only needs for `k>=2`); and
+- the sharp `K(s) = nu (1 - s/k)^n - gamma + c_{u,v} s^2`, generalized from the
+  `n=8` `k=1` special cut using the cut identity `lambda >= 1 - s/k` (so
+  `P >= nu (1 - s/k)^n`, which is *stronger* for `k>=2`).
+
+The sharp bound is a two-sided squeeze `c_{u,v} s^2 <= delta <= gamma - nu
+(1-s/k)^n` that stays consistent by a small margin near small-to-moderate `s`.
+The marginal-style first-variation refinement (upper bound `delta` via
+`(n lambda - k) P >= (n-k) lambda^n nu - 2 delta`) gives **no** improvement: a
+numeric `(s, lambda)` scan shows the worst point sits at `lambda` near `1`
+(for `k>=2`) or `lambda = 1 - s` (for `k=1`), where that refinement is vacuous.
+Even the theoretically optimal near-zero subset constants
+`c_d = (1/d + 1/(n-d))/2` cannot cover the worst `k=1` cuts (they would need
+`c_{u,v}` roughly doubled).
+
+### The shared improvement lever (measured)
+
+Both open families under-use one fact: the dominated doubly stochastic `B`
+always inherits the two independent zeros of `A`, yet the open permanent bounds
+`M_z` (support) and `nu` (proper) are computed from the cut's own zero block
+alone.  A **combined minimum-permanent bound** — cut zero block *plus* the
+inherited zeros — could raise the open margins.  But it must respect
+**absorption** (correctness fix flagged in review): a `u x v` block can already
+contain one of the inherited zeros (both, when `u>=2` and `v>=2`), and a single
+zero column can contain at most one (the two need distinct columns).  So only
+the zeros that cannot be absorbed are *guaranteed* to add new constraints;
+adding two free zeros unconditionally minimizes over a strictly smaller face and
+overstates the bound.  `combined_permanent_derisk_n6.py` now computes the
+guaranteed bound over the worst placement.  Result:
+
+| Open cut | `per(B)` needed | guaranteed | verdict |
+| --- | ---: | ---: | --- |
+| proper `(1,2,3)`, `(2,1,3)` (absorb 1) | `0.01662` | `0.01645` | no |
+| proper `(1,3,2)`, `(3,1,2)` (absorb 1) | `0.01836` | `0.01728` | no |
+| proper `(1,4,1)`, `(4,1,1)` (absorb 1) | `0.02901` | `0.01922` | no |
+| proper `(2,2,2)` (absorb 2) | `0.01872` | `0.01758` (`nu`) | no |
+| proper `(2,3,1)`, `(3,2,1)` (absorb 2) | `0.03337` | `0.02083` (`nu`) | no |
+| support `z=1` (absorb 1) | `0.01652` | `0.01604` | no |
+| support `z=2` (absorb 1) | `0.01660` | `0.01645` | no |
+
+**After correct absorption handling, no open cut closes via the combined
+bound.**  The earlier "closures" of `(1,2,3),(2,1,3)` and support `z=2` were
+artifacts of adding two guaranteed-outside zeros; with only the one
+non-absorbed zero the guaranteed bound drops below threshold.
+
+**The one rigorous closure** stands independently: `B` lies on the two-zero
+face, so `per(B) >= max(nu, 2/125)`, and for `(1,1,4)` the block barycenter
+`nu = 0.01573` is *below* `2/125 = 0.016`.  With `per(B) >= 2/125` the sharp
+bound `K(s)` has exact Bernstein-min `+1.17e-5 > 0` on `[0, s_max]` (checked in
+`diagnose_cut_scoreboard_n6.py`, which now applies `max(nu, 2/125)`).  This uses
+only the two inherited zeros, so absorption does not affect it.  It drops the
+open proper cuts from ten to nine.  A 3-independent-zero reduction is
+**unnecessary** — `(1,1,4)` is the only single-cell-block cut and it is already
+closed by the two-zero bound; every other open cut has `nu > 2/125` and gains
+nothing from it.
+
+### Remaining frontier for the hard cuts
+
+The `k=1,2` proper cuts need a different handle than a better `per(B)`:
+
+- **Fold the `k=1` proper cuts into the marginal large-line argument.**  A
+  `k=1` proper cut has `u+v = n-1`, the maximal proper zero block, so `B` is one
+  step from decomposable and `A` carries a distinguished large line.  The
+  marginal section's large-column support bound (`U_z`, `R_{0,z}`, `G_z`) is far
+  sharper than the crude `K(s)` and is the natural tool; the `k=1` cuts should
+  be routed through it rather than the proper-cut `K`.
+- **Strengthen the deficit lower bound** beyond `delta >= c_{u,v} s^2` for the
+  `k=2` cuts (a linear-in-`s` deficit term, or a cut-specific Pinsker bound that
+  keeps more than the quadratic).
+
+Each closed cut still needs an *exact* minimum-permanent reduction (in the style
+of `two_zero_permanent_polynomial`) before it counts; the de-risk tool only
+tells us which reductions are worth deriving.  Even so, this route is far more
+tractable than the 34-variable global SOS: each cut is one low-dimensional
+permanent minimization plus a Sturm/Bernstein check, and the open set is now
+seven cuts, all of one structural type.
 
 ## Numerical geometry of the hard face
 
